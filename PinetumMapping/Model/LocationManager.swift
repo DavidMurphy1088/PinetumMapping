@@ -2,94 +2,14 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class VisitRecord : Codable, Hashable {
-    //:Encodable, Hashable, Comparable, ObservableObject {
-    var deviceName:String
-    var datetime:TimeInterval
-    var latitude:Double
-    var longitude:Double
-    var bearing:Int
-    
-    init(deviceName:String, lat:Double, lng:Double) {
-        self.deviceName = deviceName
-        self.datetime = Date().timeIntervalSince1970
-        self.latitude = lat
-        self.longitude = lng
-        self.bearing = 0
-    }
-    
-    static func == (lhs: VisitRecord, rhs: VisitRecord) -> Bool {
-        return lhs.datetime < rhs.datetime
-    }
-    
-    static func < (lhs: VisitRecord, rhs: VisitRecord) -> Bool {
-        return lhs.datetime < rhs.datetime
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(String(self.datetime))
-    }
-}
-
-class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObject, Encodable, Decodable, Comparable, ObservableObject {
-    public var visits : [VisitRecord] = []
-    var deviceName:String
-    var locationName:String
-    var datetime:TimeInterval
-    var spare:String
-    var id:String
-    
-    init(deviceName:String, locationName: String, lat: Double, lng: Double) {
-        self.id = UUID().uuidString
-        self.deviceName = deviceName
-        self.locationName = locationName
-        self.visits = []
-        self.visits.append(VisitRecord(deviceName: Persistance.shared.getDeviceName(), lat: lat, lng: lng))
-        self.datetime = Date().timeIntervalSince1970
-        self.spare = ""
-    }
-
-    required init(from decoder:Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        id = try values.decode(String.self, forKey: .id)
-        deviceName = try values.decode(String.self, forKey: .deviceName)
-        locationName = try values.decode(String.self, forKey: .locationName)
-        datetime = try values.decode(TimeInterval.self, forKey: .datetime)
-        spare = try values.decode(String.self, forKey: .spare)
-        visits = try values.decode([VisitRecord].self, forKey: .visits)
-    }
-        
-    static func < (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
-        if lhs.locationName < rhs.locationName {
-            return true
-        }
-        else {
-            return lhs.datetime < rhs.datetime
-        }
-    }
-    
-    static func == (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
-        return lhs.locationName == rhs.locationName && lhs.datetime == rhs.datetime
-    }
-    
-    func addRevisit(rec:VisitRecord) {
-        self.visits.append(rec)
-    }
-}
-
-class LocationStatus : ObservableObject {
-    var lastStableLocation:CLLocationCoordinate2D?
-    var message:String?
-}
-
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published public var locations : [LocationRecord] = []
+    static public let shared = LocationManager()
+    
     @Published var currentLocation: CLLocationCoordinate2D?
     @Published var currentHeading: CLLocationDirection?
-    @Published public var status: LocationStatus = LocationStatus()
-    @Published public var lastStableLocation: CLLocationCoordinate2D?
+    @Published var status: String?
+    @Published var lastStableLocation: CLLocationCoordinate2D?
 
-    static public let shared = LocationManager()
     private let locationManager = CLLocationManager()
     private var locationReadCount = 0
     private var lastLocation: CLLocationCoordinate2D?
@@ -108,29 +28,13 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             print("Unknown Precise Location")
         }
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locations = []
-        if let data = UserDefaults.standard.data(forKey: "GPSData") {
-            if let decoded = try? JSONDecoder().decode([LocationRecord].self, from: data) {
-                locations = decoded
-                for loc in self.locations {
-                    print(" revisit", loc.locationName, loc.visits.count)
-                }
-            }
-            else {
-                setStatus("ERROR:Cant load locations")
-            }
-        }
-        
-        setStatus("Loaded locations, length \(self.locations.count)")
-        print("===>locaed locations 1", self.locations.count)
-        //loadFromCloud()
     }
     
     private func setStatus(_ msg: String) {
         DispatchQueue.main.async {
-            self.status.message = msg
+            self.status = msg
             if let loc = self.currentLocation {
-                self.status.message! += "\nCurrent:" + String(String(format: "%.4f",loc.latitude) + ", "  + String(String(format: "%.4f",loc.longitude)))
+                self.status! += "\nCurrent:" + String(String(format: "%.4f",loc.latitude) + ", "  + String(String(format: "%.4f",loc.longitude)))
             }
         }
     }
@@ -178,7 +82,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             else {
                 lastStableLocCounter = 0
             }
-            if lastStableLocCounter >= 0 { // 5 todo
+            if lastStableLocCounter >= 1 { // 5 todo
                 lastStableLocation = currentLocation
             }
             else {
@@ -196,17 +100,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             self.lastStableLocCounter = 0
         }
     }
-    
-    func saveLocation(rec: LocationRecord) {
-        DispatchQueue.main.async {
-            self.locations.append(rec)
-            Persistance.shared.saveLocations(locations: self.locations)
-            self.setStatus("saved length \(self.locations.count)")
-            print("saved locs", self.locations.count)
-        }
-        self.currentLocation = nil
-    }
-    
+        
     func reset() {
         locationReadCount = 0
         locationManager.stopUpdatingLocation()
@@ -218,11 +112,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         self.setStatus("Reset Location Manager")
     }
 
-    func clearList() {
-        self.locations.removeAll()
-        UserDefaults.standard.removeObject(forKey: "GPSData")
-    }
-    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         setStatus("ERROR:"+error.localizedDescription)
     }
@@ -266,13 +155,5 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         return r * 6371 * 1000
     }
     
-    func fmtDatetime(datetime : TimeInterval) -> String {
-        let dt  = Date(timeIntervalSince1970:datetime)
-        let formatter = DateFormatter()
-        formatter.timeZone = TimeZone.current
-        formatter.dateFormat = "MMM-dd HH:mm"
-        let dateString = formatter.string(from: dt)
-        return dateString
-    }
 }
 

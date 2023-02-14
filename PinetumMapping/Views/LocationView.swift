@@ -8,7 +8,8 @@ import UIKit
 
 struct LocationView: View {
     //http://dwtkns.com/pointplotter/
-    @ObservedObject var locationRecord:LocationRecord
+    @ObservedObject var locations:Locations
+    @ObservedObject var location:LocationRecord
     @ObservedObject var locationManager = LocationManager.shared
     @Environment(\.scenePhase) private var scenePhase
 
@@ -19,8 +20,8 @@ struct LocationView: View {
         Form {
             VStack {
                 VStack(alignment: .center) {
-                    Text("Save Location Revisit").font(.title2).bold()
-                    if let message = locationManager.status.message {
+                    Text("Save a New Location Revisit").font(.title2).bold()
+                    if let message = locationManager.status {
                         Text("\n"+message+"\n").foregroundColor(.gray)
                     }
                 }
@@ -31,14 +32,8 @@ struct LocationView: View {
                     }
                     Spacer()
                     Button("Save") {
-                        let revisitRecord = VisitRecord(deviceName: Persistance.shared.getDeviceName(), lat: cords.latitude, lng: cords.longitude)
-//                        let dist = locationManager.distance(startLat:locationRecord.latitude,
-//                                                            startLng:locationRecord.longitude,
-//                                                            endLat: cords.latitude,
-//                                                            endLng: cords.longitude)
-//                        revisitRecord.distanceFromOriginalLocation = dist
-                        locationRecord.addRevisit(rec: revisitRecord)
-                        Persistance.shared.saveLocations(locations: locationManager.locations)
+                        let revisitRecord = VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), lat: cords.latitude, lng: cords.longitude)
+                        locations.addVisit(location: location, visit: revisitRecord)
                         locationManager.resetLastStableLocation()
                         savePopup = false
                     }
@@ -66,24 +61,27 @@ struct LocationView: View {
     }
 
     func visitLine(rec : VisitRecord) -> String {
-        var ret = locationManager.fmtDatetime(datetime: rec.datetime)
-        let firstVisit = locationRecord.visits[0]
+        var ret = Util.fmtDatetime(datetime: rec.datetime) + "\t" + rec.deviceName
+        let firstVisit = location.visits[0]
         let dist = locationManager.distance(startLat: firstVisit.latitude, startLng: firstVisit.longitude, endLat: rec.latitude, endLng: rec.longitude)
-        ret += " Distance to first:"+String(format: "%.1f",dist)
-        ret += locationRecord.deviceName
+        ret += "\nDistance to first:"+String(format: "%.1f",dist)
         return ret
     }
     
     func delete(at offsets: IndexSet) {
-        locationRecord.visits.remove(atOffsets: offsets)
+        let min = offsets.min()
+        if let index = min {
+            if index > 0 {
+                locations.deleteVisit(location: location, visitNum: index) 
+            }
+        }
     }
 
     var body: some View {
         VStack {
-            Text("Location:" + locationRecord.locationName).font(.title2).bold()
-            //Text("Location at:"+String(format: "%.4f",locationRecord.latitude) + ",  " + String(format: "%.4f", locationRecord.longitude))
+            Text("Location:" + location.locationName).font(.title2).bold()
             Text("Distance from current location:" + String(format: "%.1f",distance()))
-            if let message = locationManager.status.message {
+            if let message = locationManager.status {
                 Text(message).font(.caption)
             }
 
@@ -94,12 +92,12 @@ struct LocationView: View {
 
             List {
                 Text("Visits to this location").font(.title3).bold()
-                ForEach(locationRecord.visits, id: \.datetime) { revisit in
+                ForEach(location.visits, id: \.datetime) { revisit in
                     Text(self.visitLine(rec: revisit))
                 }
+                //.onDelete(perform: revisit.de ? delete : nil)
                 .onDelete(perform: delete)
             }
-            
             saveVisitView(saveLocation: locationManager.lastStableLocation)
         }
     }
@@ -125,8 +123,8 @@ struct LocationView: View {
         let lat1 = srcLat
         let lon1 = srcLong
         
-        let lat2 = locationRecord.visits[0].latitude
-        let lon2 = locationRecord.visits[0].longitude
+        let lat2 = location.visits[0].latitude
+        let lon2 = location.visits[0].longitude
 
         let dLon = lon2 - lon1
 
@@ -142,9 +140,9 @@ struct LocationView: View {
         //where    φ1,λ1 is the start point, φ2,λ2 the end point (Δλ is the difference in longitude)
         //1 = current, 2 = location record
 
-        let y = sin(locationRecord.visits[0].longitude-currentLong) * cos(locationRecord.visits[0].latitude);
-        let x = cos(currentLat)*sin(locationRecord.visits[0].latitude) -
-        sin(currentLat)*cos(locationRecord.visits[0].latitude)*cos(locationRecord.visits[0].longitude-currentLong);
+        let y = sin(location.visits[0].longitude-currentLong) * cos(location.visits[0].latitude);
+        let x = cos(currentLat)*sin(location.visits[0].latitude) -
+        sin(currentLat)*cos(location.visits[0].latitude)*cos(location.visits[0].longitude-currentLong);
         let radians = atan2(y, x);
         //let brng = (theta*180/Double.pi + 360) % 360; // in degrees
         let brng = radians * 180 / Double.pi
@@ -167,7 +165,7 @@ struct LocationView: View {
     
     func distance() -> Double {
         if let cur = locationManager.currentLocation {
-            return locationManager.distance(startLat:locationRecord.visits[0].latitude, startLng:locationRecord.visits[0].longitude,
+            return locationManager.distance(startLat:location.visits[0].latitude, startLng:location.visits[0].longitude,
                                             endLat: cur.latitude, endLng: cur.longitude)
         }
         else {

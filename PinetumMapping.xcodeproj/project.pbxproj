@@ -35,7 +35,7 @@
 		7B37CCE8299259D300B201EC /* FirebaseRemoteConfigSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCE7299259D300B201EC /* FirebaseRemoteConfigSwift */; };
 		7B37CCEA299259D300B201EC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCE9299259D300B201EC /* FirebaseStorage */; };
 		7B37CCEC299259D300B201EC /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCEB299259D300B201EC /* FirebaseStorageCombine-Community */; };
-		7B37CCEE2992622F00B201EC /* Persistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37CCED2992622F00B201EC /* Persistance.swift */; };
+		7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37CCED2992622F00B201EC /* GPSPersistence.swift */; };
 		7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */; };
 		7BA33E31299237820089FAF3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E30299237820089FAF3 /* ContentView.swift */; };
 		7BA33E33299237840089FAF3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BA33E32299237840089FAF3 /* Assets.xcassets */; };
@@ -45,12 +45,14 @@
 		7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E42299238F00089FAF3 /* LocationManager.swift */; };
 		7BA33E452992396D0089FAF3 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E442992396D0089FAF3 /* LocationView.swift */; };
 		7BA33E47299239960089FAF3 /* LocationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E46299239960089FAF3 /* LocationsView.swift */; };
+		7BCAAC80299B70D700CB4B53 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC7F299B70D700CB4B53 /* Locations.swift */; };
+		7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC81299B73CE00CB4B53 /* Util.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PinetumMapping.entitlements; sourceTree = "<group>"; };
 		7B37CCB42992589500B201EC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		7B37CCED2992622F00B201EC /* Persistance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistance.swift; sourceTree = "<group>"; };
+		7B37CCED2992622F00B201EC /* GPSPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSPersistence.swift; sourceTree = "<group>"; };
 		7BA33E2B299237820089FAF3 /* PinetumMapping.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PinetumMapping.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinetumMappingApp.swift; sourceTree = "<group>"; };
 		7BA33E30299237820089FAF3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -62,6 +64,8 @@
 		7BA33E42299238F00089FAF3 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7BA33E442992396D0089FAF3 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		7BA33E46299239960089FAF3 /* LocationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsView.swift; sourceTree = "<group>"; };
+		7BCAAC7F299B70D700CB4B53 /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
+		7BCAAC81299B73CE00CB4B53 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,16 +125,13 @@
 		7BA33E2D299237820089FAF3 /* PinetumMapping */ = {
 			isa = PBXGroup;
 			children = (
-				7B37CCED2992622F00B201EC /* Persistance.swift */,
-				7B37CCB42992589500B201EC /* GoogleService-Info.plist */,
-				7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */,
+				7BCAAC7E299B708E00CB4B53 /* Views */,
+				7BCAAC7D299B707600CB4B53 /* Model */,
 				7BA33E32299237840089FAF3 /* Assets.xcassets */,
-				7BA33E30299237820089FAF3 /* ContentView.swift */,
+				7B37CCB42992589500B201EC /* GoogleService-Info.plist */,
 				7BA33E3C299237840089FAF3 /* Info.plist */,
-				7BA33E42299238F00089FAF3 /* LocationManager.swift */,
-				7BA33E46299239960089FAF3 /* LocationsView.swift */,
-				7BA33E442992396D0089FAF3 /* LocationView.swift */,
 				7BA33E37299237840089FAF3 /* Persistence.swift */,
+				7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */,
 				7BA33E39299237840089FAF3 /* PinetumMapping.xcdatamodeld */,
 				7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */,
 				7BA33E34299237840089FAF3 /* Preview Content */,
@@ -144,6 +145,27 @@
 				7BA33E35299237840089FAF3 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		7BCAAC7D299B707600CB4B53 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7B37CCED2992622F00B201EC /* GPSPersistence.swift */,
+				7BA33E42299238F00089FAF3 /* LocationManager.swift */,
+				7BCAAC7F299B70D700CB4B53 /* Locations.swift */,
+				7BCAAC81299B73CE00CB4B53 /* Util.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		7BCAAC7E299B708E00CB4B53 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7BA33E30299237820089FAF3 /* ContentView.swift */,
+				7BA33E442992396D0089FAF3 /* LocationView.swift */,
+				7BA33E46299239960089FAF3 /* LocationsView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,14 +271,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BCAAC80299B70D700CB4B53 /* Locations.swift in Sources */,
 				7BA33E38299237840089FAF3 /* Persistence.swift in Sources */,
 				7BA33E452992396D0089FAF3 /* LocationView.swift in Sources */,
 				7BA33E3B299237840089FAF3 /* PinetumMapping.xcdatamodeld in Sources */,
 				7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */,
 				7BA33E31299237820089FAF3 /* ContentView.swift in Sources */,
 				7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */,
+				7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */,
 				7BA33E47299239960089FAF3 /* LocationsView.swift in Sources */,
-				7B37CCEE2992622F00B201EC /* Persistance.swift in Sources */,
+				7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

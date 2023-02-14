@@ -29,13 +29,14 @@ struct ContentView: View {
 struct GPSReadView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject var locationManager = LocationManager.shared
-    @ObservedObject var persistence = Persistance.shared
+    @ObservedObject var locations = Locations.shared
+    @ObservedObject var persistence = GPSPersistence.shared
     
     @State private var savePopup = false
     @State private var savePopup1 = false
     @State private var locationName: String = ""
     @State private var addDirections = false
-    @State var fsTest = Persistance()
+    @State var fsTest = GPSPersistence()
     @State var showingDeviceNamePopover = false
     @State var deviceName: String = ""
 
@@ -48,7 +49,7 @@ struct GPSReadView: View {
             VStack {
                 VStack(alignment: .center) {
                     Text("Save Location").font(.title2).bold()
-                    if let message = locationManager.status.message {
+                    if let message = locationManager.status {
                         Text(message).foregroundColor(.gray)
                     }
                     TextField("name of location", text: $locationName)
@@ -68,10 +69,10 @@ struct GPSReadView: View {
                     Button("Save") {
                         if let saveCords = cords {
                             let rec = LocationRecord(
-                                deviceName: Persistance.shared.getDeviceName(),
                                 locationName: locationName,
                                 lat: saveCords.latitude, lng: saveCords.longitude)
-                            self.locationManager.saveLocation(rec: rec)
+                            self.locations.addLocation(location: rec)
+                            //self.locationManager.currentLocation = nil
                             //                        if false && addDirections {
                             //                            let delta = 0.0002
                             //                            rec = LocationRecord(name: locationName+"_NE",
@@ -121,24 +122,26 @@ struct GPSReadView: View {
             Text("GPS Reader").font(.title2).bold()
             Spacer()
             Text("Device Name: " + (self.persistence.getDeviceName()))
-            if let message = locationManager.status.message {
+            if let message = locationManager.status {
                 Spacer()
-                Text(message)
+                Text("Location Mgr: " + message).font(.caption)
             }
             if let message = persistence.status {
                 Spacer()
-                Text(message)
+                Text("Persist Mgr: " + message).font(.caption)
             }
             if locationManager.currentLocation == nil {
                 Spacer()
                 Text("Start Location Manager")
-                .foregroundColor(.green)
-                .font(.title3)
+                    .foregroundColor(.red)
+                    .font(.title3)
+                    .padding()
                 LocationButton {
                     locationManager.requestLocation()
                 }
                 .symbolVariant(.fill)
                 .labelStyle(.titleAndIcon)
+                .padding()
             }
             
             VStack {
