@@ -2,6 +2,20 @@ import Foundation
 import CoreLocation
 import MapKit
 
+class Delta : NSObject, ObservableObject {
+    var lat:Double
+    var lng:Double
+    init(lat:Double, lng: Double) {
+        self.lat = lat
+        self.lng = lng
+    }
+}
+
+class Deltas : NSObject, ObservableObject {
+    public var deltas:[Delta] = []
+    @Published var deltaCnt = 0
+}
+
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     static public let shared = LocationManager()
     
@@ -9,9 +23,12 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var currentHeading: CLLocationDirection?
     @Published var status: String?
     @Published var lastStableLocation: CLLocationCoordinate2D?
-
+    @Published var deltas: Deltas = Deltas()
+    
+    public var requiredStability:Int = 5
     private let locationManager = CLLocationManager()
     private var locationReadCount = 0
+    private var firstLocation: CLLocationCoordinate2D?
     private var lastLocation: CLLocationCoordinate2D?
     private var lastStableLocCounter:Int = 0
     
@@ -69,6 +86,9 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 }
             }
         }
+        if firstLocation == nil {
+            firstLocation = currentLocation
+        }
         
         var deltaStr = ""
         if let delta = delta {
@@ -82,14 +102,26 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             else {
                 lastStableLocCounter = 0
             }
-            if lastStableLocCounter >= 1 { // 5 todo
+            if lastStableLocCounter >= self.requiredStability {
                 lastStableLocation = currentLocation
             }
             else {
                 self.lastStableLocation = nil
             }
         }
+        
         DispatchQueue.main.async { [self] in
+            if let current = currentLocation {
+                let deltaFromFirst = Delta(lat: current.latitude - self.firstLocation!.latitude, lng: current.longitude - self.firstLocation!.longitude)
+                if let delta = delta {
+                    if delta > 1.0 {
+                        self.deltas.deltas.append(deltaFromFirst)
+                        self.deltas.deltaCnt += 1
+                    }
+                }
+                print("New GPS ================", self.locationReadCount, self.deltas.deltas.count, currentLocation?.latitude, deltaFromFirst.lat)
+
+            }
             self.setStatus("Count:\(self.locationReadCount) Delta:" + (deltaStr) + " Consec:" + String(lastStableLocCounter))
         }
     }
@@ -156,4 +188,5 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     }
     
 }
+
 

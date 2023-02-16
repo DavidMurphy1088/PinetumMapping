@@ -10,9 +10,9 @@ class VisitRecord : Codable, Hashable {
     var longitude:Double
     var bearing:Int
     
-    init(deviceName:String, lat:Double, lng:Double) {
+    init(deviceName:String, datetime:TimeInterval, lat:Double, lng:Double) {
         self.deviceName = deviceName
-        self.datetime = Date().timeIntervalSince1970
+        self.datetime = datetime
         self.latitude = lat
         self.longitude = lng
         self.bearing = 0
@@ -32,33 +32,23 @@ class VisitRecord : Codable, Hashable {
 }
 
 class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObject, Encodable, Decodable, Comparable, ObservableObject {
-    var id:String
+    private var id:String
     public var visits : [VisitRecord] = []
     var locationName:String
     var spare:String
-    var deleted = false
     
-    init(id:String? = nil, locationName: String, lat: Double, lng: Double) {
-        if let id = id {
-            self.id = id
-        }
-        else {
-            self.id = UUID().uuidString
-        }
+    init(id:String, locationName: String, datetime:TimeInterval, lat: Double, lng: Double) {
+        self.id = id
         self.locationName = locationName
         self.visits = []
         self.spare = ""
-        self.visits.append(VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), lat: lat, lng: lng))
+        self.visits.append(VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
     }
-
-//    required init(from decoder:Decoder) throws {
-//        let values = try decoder.container(keyedBy: CodingKeys.self)
-//        id = try values.decode(String.self, forKey: .id)
-//        locationName = try values.decode(String.self, forKey: .locationName)
-//        spare = try values.decode(String.self, forKey: .spare)
-//        visits = try values.decode([VisitRecord].self, forKey: .visits)
-//    }
         
+    func getID() -> String {
+        return self.id
+    }
+    
     static func < (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
         if lhs.locationName < rhs.locationName {
             return true
@@ -69,7 +59,8 @@ class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObj
     }
     
     static func == (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
-        return lhs.locationName == rhs.locationName && lhs.visits[0].datetime == rhs.visits[0].datetime
+        //return lhs.locationName == rhs.locationName && lhs.visits[0].datetime == rhs.visits[0].datetime
+        return lhs.id == rhs.id
     }
     
 }
@@ -81,18 +72,6 @@ class Locations: NSObject, ObservableObject {
     @Published var status: String?
     
     override init() {
-        locations = []
-//            if let data = UserDefaults.standard.data(forKey: "GPSData") {
-//                if let decoded = try? JSONDecoder().decode([LocationRecord].self, from: data) {
-//                    locations = decoded
-//                    for loc in self.locations {
-//                        print(" revisit", loc.locationName, loc.visits.count)
-//                    }
-//                }
-//                else {
-//                    setStatus("ERROR:Cant load locations")
-//                }
-//            }
         GPSPersistence.shared.getLocations()
     }
     
@@ -139,9 +118,10 @@ class Locations: NSObject, ObservableObject {
             let delLoc = self.locations[row]
             let name = delLoc.locationName
             self.locations.remove(at: row)
-            GPSPersistence.shared.deleteLocation(locationId: delLoc.id)
+            GPSPersistence.shared.deleteLocation(locationId: delLoc.getID())
             self.setStatus("Deleted \(name)")
         }
     }
 
 }
+

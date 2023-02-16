@@ -19,6 +19,7 @@ struct LocationsView: View {
         if let index = offsets.min() {
             locations.deleteLocation(row: index)
         }
+        //locations.remove(atOffsets: offsets)
     }
     
     func locationDisplayLine(rec:LocationRecord) -> String {
@@ -63,7 +64,7 @@ struct LocationsView: View {
                     .onDelete(perform: delete)
                 }
                 .navigationDestination(for: LocationRecord.self, destination: { loc in
-                    LocationView(locations: locations, location: loc)
+                    LocationVisitsView(locations: locations, location: loc)
                 })
                 Button("Clear List", role: .destructive) {
                       isPresentingConfirm = true
