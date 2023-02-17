@@ -38,7 +38,7 @@ struct GPSReadView: View {
     @State private var addDirections = false
     @State var showingDeviceNamePopover = false
     @State var deviceName: String = ""
-    @State private var stability: Double = 5
+    @State private var stability: Double = 4
     
     func fmt(_ l: CLLocationCoordinate2D) -> String {
         return String(format: "%.5f", l.latitude)+",  "+String(format: "%.5f", l.longitude)
@@ -50,7 +50,7 @@ struct GPSReadView: View {
                 VStack(alignment: .center) {
                     Text("Save Location").font(.title2).bold()
                     if let message = locationManager.status {
-                        Text(message).foregroundColor(.gray)
+                        Text(message)//.foregroundColor(.gray)
                     }
                     TextField("name of location", text: $locationName)
                         .textFieldStyle(.roundedBorder)
@@ -74,27 +74,7 @@ struct GPSReadView: View {
                                 datetime: Date().timeIntervalSince1970,
                                 lat: saveCords.latitude, lng: saveCords.longitude)
                             self.locations.addLocation(location: rec)
-                            //self.locationManager.currentLocation = nil
-                            //                        if false && addDirections {
-                            //                            let delta = 0.0002
-                            //                            rec = LocationRecord(name: locationName+"_NE",
-                            //                                                 lat: l.latitude + delta,
-                            //                                                 lng: l.longitude + delta)
-                            //                            self.locationManager.saveLocation(rec: rec)
-                            //                            rec = LocationRecord(name: locationName+"_NW",
-                            //                                                 lat: l.latitude + delta,
-                            //                                                 lng: l.longitude - delta)
-                            //                            self.locationManager.saveLocation(rec: rec)
-                            //                            rec = LocationRecord(name: locationName+"_SE",
-                            //                                                 lat: l.latitude - delta,
-                            //                                                 lng: l.longitude + delta)
-                            //                            self.locationManager.saveLocation(rec: rec)
-                            //                            rec = LocationRecord(name: locationName+"_SW",
-                            //                                                 lat: l.latitude - delta,
-                            //                                                 lng: l.longitude - delta)
-                            //                            self.locationManager.saveLocation(rec: rec)
-                            //                        }
-                            locationManager.resetLastStableLocation()
+                            //locationManager.resetLastStableLocation()
                         }
                         savePopup = false
                     }
@@ -121,53 +101,78 @@ struct GPSReadView: View {
     
     // =============== 2D plot ==========================
 
-    struct PlotShape: Shape {
+    struct LocationPointsView: View {
         @State var count: Int
-
-        var diameter = 10.0
-
         @ObservedObject var deltas = LocationManager.shared.deltas
-
-        func path(in rect: CGRect) -> Path {
-            var path = Path()
+        //@ObservedObject var center:Delta = LocationManager.shared.centerPlotPoint
+        private let diameter = 12.0
+        
+        func scale(dimension: Double) -> Double {
             var max = 0.0
             for delta in deltas.deltas {
-                if delta.lat > max {
-                    max = delta.lat
+                if abs(delta.lat) > max {
+                    max = abs(delta.lat)
                 }
-                if delta.lng > max {
-                    max = delta.lng
+                if abs(delta.lng) > max {
+                    max = abs(delta.lng)
                 }
             }
-            var scale = Double(rect.width) / max
-            scale = scale/2.0
-            print ("===>=====>", deltas.deltaCnt, scale, rect.width)
-            for i in 0..<count {
-                let pt = CGPoint(x: deltas.deltas[i].lat*scale, y: deltas.deltas[i].lat*scale)
-                path.move(to: CGPoint(x: rect.width/2, y:rect.height/2))
-                path.addLine(to: pt)
-                path.addEllipse(in: CGRect(x: pt.x, y: pt.y, width: diameter, height: diameter))
+            var scale:Double
+            if max == 0 {
+                scale = 1.0
             }
-            return path
+            else {
+                scale = Double(dimension/2.0) / max
+            }
+            scale = scale/1.2
+            return scale
         }
-    }
+        
+        func x(_ delta: Delta, width: Double) -> Double {
+            let offset = width/2.0
+            let res = (scale(dimension: width) * delta.lat) + offset
+            return res
+        }
+        
+        func y(_ delta: Delta, height: Double) -> Double {
+            let offset = height/2
+            //let xs = locationManager.centerPlotPoint
+            return scale(dimension: height) * delta.lng + offset
+        }
 
-    struct PlotView: View {
-        @State var count: Int
-        @ObservedObject var deltas = LocationManager.shared.deltas
+        func color(_ plotType:Int) -> Color {
+            switch plotType {
+//            case 2:
+//                return Color(.blue)
+            case 1:
+                return Color(.red)
+            default:
+                return Color(.green)
+            }
 
+        }
+        
         var body: some View {
-            VStack {
-                ZStack {
-                    Rectangle()
-                        .stroke(Color.gray, lineWidth: 3.0)
-                        .frame(width: 300, height: 300, alignment: .center)
-                    Text("PV=\(deltas.deltaCnt)")
-                    PlotShape(count: deltas.deltaCnt)
-                        .stroke(Color.red, lineWidth: 2.0)
-                        //.frame(width: 300, height: 300, alignment: .center)
+            GeometryReader { geometry in
+                VStack {
+                    ZStack {
+                        //Rectangle().stroke(Color.gray, lineWidth: 3.0).frame(width: 300, height: 300, alignment: .center)
+                        ForEach(0..<deltas.deltaCnt, id: \.self) { idx in
+                            if deltas.deltas[idx].ptType >= 0 {
+                                Circle()
+                                    .fill(color(deltas.deltas[idx].ptType))
+                                    .frame(width: diameter, height: diameter)
+                                    .position(x: x(deltas.deltas[idx], width: geometry.size.width),
+                                              y: y(deltas.deltas[idx], height: geometry.size.height))
+                            }
+                        }
+//                        Circle()
+//                            .fill(.blue)
+//                            .frame(width: diameter, height: diameter)
+//                            .position(x: x(center, width: geometry.size.width),
+//                                      y: y(center, height: geometry.size.height))
+                    }
                 }
-                Spacer()
             }
         }
     }
@@ -177,11 +182,11 @@ struct GPSReadView: View {
     func gpsView() -> some View {
         VStack {
             Text("GPS Reader").font(.title2).bold()
-            Spacer()
-            Text("Device Name: " + (self.persistence.getDeviceName()))
+            //Spacer()
+            //Text("Device Name: " + (self.persistence.getDeviceName()))
             if let message = locationManager.status {
                 Spacer()
-                Text("Location Mgr: " + message).font(.caption)
+                Text("Location: " + message)//.font(.)
             }
             if let message = persistence.status {
                 Spacer()
@@ -203,27 +208,29 @@ struct GPSReadView: View {
             
             VStack {
                 Spacer()
-                Text("View ====\(deltas.deltaCnt)")
-                PlotView(count: deltas.deltaCnt)
+                LocationPointsView(count: deltas.deltaCnt)
                 Spacer()
-                Button("Save Location") {
-                    savePopup.toggle()
+                HStack {
+                    Spacer()
+                    Button("Save Location") {
+                        savePopup.toggle()
+                    }
+                    .disabled(!locationManager.locationIsStable)
+                    .popover(isPresented: $savePopup) {
+                        saveForm(cords: locationManager.lastStableLocation)
+                    }
+                    Spacer()
+                    Button("Reset GPS") {
+                        locationManager.reset()
+                    }
+                    Spacer()
                 }
-                .disabled(locationManager.lastStableLocation == nil)
-                .popover(isPresented: $savePopup) {
-                    saveForm(cords: locationManager.lastStableLocation)
-                }
-                //saveLocation().disabled(locationManager.lastStableLocation == nil)
                 
-                Spacer()
-                Button("Reset Location Manager") {
-                    locationManager.reset()
-                }
                 VStack {
-                    Slider(value: $stability, in: 1...20)
+                    Slider(value: $stability, in: 1...10)
                     .onChange(of: stability) { newValue in
-                        print("Name changed to \(stability)!")
-                        locationManager.requiredStability = Int(stability)
+                        //print("Name changed to \(stability)!")
+                        locationManager.requiredStabilityCounter = Int(stability)
                     }
                     Text("Required stability is \(stability, specifier: "%.0f")")
                 }

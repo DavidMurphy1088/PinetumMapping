@@ -6,8 +6,7 @@ import CoreLocationUI
 import CoreLocation
 import UIKit
 
-struct LocationView: View {
-    //http://dwtkns.com/pointplotter/
+struct LocationVisitsView: View {
     @ObservedObject var locations:Locations
     @ObservedObject var location:LocationRecord
     @ObservedObject var locationManager = LocationManager.shared
@@ -32,9 +31,9 @@ struct LocationView: View {
                     }
                     Spacer()
                     Button("Save") {
-                        let revisitRecord = VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), lat: cords.latitude, lng: cords.longitude)
+                        let revisitRecord = VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: NSDate().timeIntervalSince1970, lat: cords.latitude, lng: cords.longitude)
                         locations.addVisit(location: location, visit: revisitRecord)
-                        locationManager.resetLastStableLocation()
+                        //locationManager.resetLastStableLocation()
                         savePopup = false
                     }
                     .disabled(locationManager.lastStableLocation == nil)
@@ -72,7 +71,8 @@ struct LocationView: View {
         let min = offsets.min()
         if let index = min {
             if index > 0 {
-                locations.deleteVisit(location: location, visitNum: index) 
+                //must return he zero entry for the location's GPS locations
+                locations.deleteVisit(location: location, visitNum: index)
             }
         }
     }
@@ -175,3 +175,4 @@ struct LocationView: View {
     
 
 }
+
