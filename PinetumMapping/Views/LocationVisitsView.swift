@@ -15,7 +15,7 @@ struct LocationVisitsView: View {
     @State private var angle = 0.0
     @State private var savePopup = false
     
-    func saveForm(cords:CLLocationCoordinate2D) -> some View {
+    func saveForm(saveLocation:CLLocationCoordinate2D) -> some View {
         Form {
             VStack {
                 VStack(alignment: .center) {
@@ -31,12 +31,12 @@ struct LocationVisitsView: View {
                     }
                     Spacer()
                     Button("Save") {
-                        let revisitRecord = VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: NSDate().timeIntervalSince1970, lat: cords.latitude, lng: cords.longitude)
+                        let revisitRecord = VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: NSDate().timeIntervalSince1970, lat: saveLocation.latitude, lng: saveLocation.longitude)
                         locations.addVisit(location: location, visit: revisitRecord)
                         //locationManager.resetLastStableLocation()
                         savePopup = false
                     }
-                    .disabled(locationManager.lastStableLocation == nil)
+                    .disabled(locationManager.bestLocation == nil)
                     Spacer()
                 }
             }
@@ -53,7 +53,7 @@ struct LocationVisitsView: View {
                 .disabled(saveLocation == nil)
             }.popover(isPresented: $savePopup) {
                 if let loc = saveLocation {
-                    saveForm(cords: loc)
+                    saveForm(saveLocation: loc)
                 }
             }
         }
@@ -62,8 +62,12 @@ struct LocationVisitsView: View {
     func visitLine(rec : VisitRecord) -> String {
         var ret = Util.fmtDatetime(datetime: rec.datetime) + "\t" + rec.deviceName
         let firstVisit = location.visits[0]
-        let dist = locationManager.distance(startLat: firstVisit.latitude, startLng: firstVisit.longitude, endLat: rec.latitude, endLng: rec.longitude)
-        ret += "\nDistance to first:"+String(format: "%.1f",dist)
+        if let bestLoc = locationManager.bestLocation {
+            let currDist = locationManager.distance(startLat: bestLoc.latitude, startLng: bestLoc.longitude, endLat: rec.latitude, endLng: rec.longitude)
+            ret += "\nDistance to current:"+String(format: "%.1f",currDist)
+        }
+        let firstDist = locationManager.distance(startLat: firstVisit.latitude, startLng: firstVisit.longitude, endLat: rec.latitude, endLng: rec.longitude)
+        ret += "\nDistance to first:"+String(format: "%.1f",firstDist)
         return ret
     }
     
@@ -98,7 +102,7 @@ struct LocationVisitsView: View {
                 //.onDelete(perform: revisit.de ? delete : nil)
                 .onDelete(perform: delete)
             }
-            saveVisitView(saveLocation: locationManager.lastStableLocation)
+            saveVisitView(saveLocation: locationManager.bestLocation)
         }
     }
     
@@ -164,7 +168,7 @@ struct LocationVisitsView: View {
     }
     
     func distance() -> Double {
-        if let cur = locationManager.currentLocation {
+        if let cur = locationManager.bestLocation {
             return locationManager.distance(startLat:location.visits[0].latitude, startLng:location.visits[0].longitude,
                                             endLat: cur.latitude, endLng: cur.longitude)
         }

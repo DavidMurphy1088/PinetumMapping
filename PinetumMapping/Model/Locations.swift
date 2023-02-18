@@ -113,13 +113,18 @@ class Locations: NSObject, ObservableObject {
         }
     }
     
-    func deleteLocation(row: Int) {
+    func deleteLocation(indexSet: IndexSet) {
         DispatchQueue.main.async {
-            let delLoc = self.locations[row]
-            let name = delLoc.locationName
-            self.locations.remove(at: row)
-            GPSPersistence.shared.deleteLocation(locationId: delLoc.getID())
-            self.setStatus("Deleted \(name)")
+            if indexSet.count == 1 {
+                if let row = indexSet.min() {
+                    let delLoc = self.locations[row]
+                    let name = delLoc.locationName
+                    self.locations.remove(at: row)
+                    print("========......start", indexSet.startIndex, "end", indexSet.endIndex, "count", indexSet.count, indexSet.min(), indexSet.max())
+                    GPSPersistence.shared.deleteLocation(locationId: delLoc.getID())
+                    self.setStatus("Deleted \(name)")
+                }
+            }
         }
     }
 

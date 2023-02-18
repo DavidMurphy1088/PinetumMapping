@@ -2,23 +2,20 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class Delta : NSObject, ObservableObject {
-    var lat:Double
-    var lng:Double
+class StableLocation {
+    var latitude:Double
+    var longitude:Double
     var ptType:Int
-    var distance: Double
     
-    init(lat:Double, lng: Double, ptType:Int, distance:Double) {
-        self.lat = lat
-        self.lng = lng
+    init(lat:Double, lng: Double, ptType:Int) { //}, distance:Double) {
+        self.latitude = lat
+        self.longitude = lng
         self.ptType = ptType
-        self.distance = distance
     }
 }
 
-class Deltas : NSObject, ObservableObject {
-    public var deltas:[Delta] = []
-    @Published var deltaCnt = 0
+class StableLocations {
+    public var locations:[StableLocation] = []
 }
 
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -26,20 +23,19 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     
     @Published var currentHeading: CLLocationDirection?
     @Published var status: String?
-    @Published var lastStableLocation: CLLocationCoordinate2D?
-    @Published var firstStableLocation: CLLocationCoordinate2D?
-    @Published var deltas: Deltas = Deltas()
     @Published var locationIsStable: Bool = false
-    //@Published var centerPlotPoint: Delta = Delta(lat: 0, lng: 0, ptType: 0, distance: 0)
+    @Published var stableLocationsCount = 0
 
-    private let locationManager = CLLocationManager()
+    public var displayLocations: [StableLocation] = []
+    public var currentLocation: CLLocationCoordinate2D?
+    public var bestLocation: CLLocationCoordinate2D? //average of all stable location GPS reads
     public var requiredStabilityCounter:Int = 4
 
-    public var currentLocation: CLLocationCoordinate2D?
+    private let locationManager = CLLocationManager()
+    private var stableLocations: StableLocations = StableLocations()
     private var locationReadCount = 0
     private var lastLocation: CLLocationCoordinate2D?
     private var stableLocCounter:Int = 0 //counts # of successive GPS readings that have not changed location much
-    private var stableLocsCount = 0
     
     override init() {
         super.init()
@@ -47,57 +43,40 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
         switch locationManager.accuracyAuthorization {
         case .fullAccuracy:
-            print("Full Accuracy")
+            self.setStatus("Full Accuracy")
         case .reducedAccuracy:
-            print("Reduced Accuracy")
+            self.setStatus("Reduced Accuracy")
         @unknown default:
-            print("Unknown Precise Location")
+            self.setStatus("Unknown Precise Location")
         }
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
     }
     
     func reset() {
         stableLocCounter = 0
-        lastStableLocation = nil
-        firstStableLocation = nil
-        deltas.deltas = []
-        deltas.deltaCnt = 0
+        stableLocations.locations = []
+        bestLocation = nil
+        
         locationIsStable = false
         currentLocation = nil
         locationReadCount = 0
         lastLocation = nil
-        stableLocsCount = 0
         
         locationManager.stopUpdatingLocation()
         locationManager.stopUpdatingHeading()
         self.setStatus("Location Manager was reset")
     }
-    
-    //public func resetLastStableLocation() {
-    //        DispatchQueue.main.async {
-    //            self.lastStableLocation = nil
-    //            self.lastStableLocCounter = 0
-    //        }
-    //    }
-    
-    func maxDistance() -> Double {
-        var max = 0.0
-        for delta in deltas.deltas {
-            if delta.distance > max {
-                max = delta.distance
-            }
-        }
-        return max
-    }
-    
+
+//    func getLastStableLocation() -> StableLocation? {
+//        if stableLocations.locations.count > 0 {
+//            return stableLocations.locations[stableLocations.locations.count - 1]
+//        }
+//        return nil
+//    }
+
     private func setStatus(_ msg: String) {
         DispatchQueue.main.async {
             self.status = msg
-//            if let loc = self.currentLocation {
-//                self.status! += "\nCurrent:" + String(String(format: "%.4f",loc.latitude) + ", "  + String(String(format: "%.4f",loc.longitude)))
-//            }
-            self.status! += "\nStables:\(self.stableLocsCount) Points:\(self.deltas.deltas.count) MaxDist:"
-                + String(format: "%.1f",self.maxDistance())
         }
     }
     
@@ -115,13 +94,10 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        //TODO device accuracy see apple for 'precise location'
-        //            //https://support.apple.com/en-nz/guide/iphone/iph3dd5f9be/ios
-        //            }
-        guard let location = locations.first else { return }
-        lastLocation = self.currentLocation
-        currentLocation = location.coordinate
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations GPSLocations: [CLLocation]) {
+        guard let GPSLocation = GPSLocations.first else { return }
+        lastLocation = currentLocation
+        currentLocation = GPSLocation.coordinate
         locationReadCount += 1
         
         var deltaFromLast:Double?
@@ -135,74 +111,73 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
 
-        var plotPoint:Delta?
-        var center:CLLocation?
-
         if let deltaFromLast = deltaFromLast {
             if deltaFromLast < 1.0 { //todo
                 stableLocCounter += 1
             }
             else {
                 stableLocCounter = 0
-            }
-            if stableLocCounter >= self.requiredStabilityCounter {
-                stableLocsCount += 1
-                if firstStableLocation == nil {
-                    firstStableLocation = currentLocation
-                    //add the plot center point
-                    deltas.deltas.append(Delta(lat: 0, lng: 0, ptType: 1, distance: 0))
-                    //deltas.deltas.append(Delta(lat: 0, lng: 0, ptType: 2, distance: 0))
-                }
-                else {
-                    if let current = currentLocation {
-                        //plot points generated as offsets from the first stable locationz
-                        let distance = distance(startLat: current.latitude , startLng: current.longitude,
-                                                endLat: firstStableLocation!.latitude, endLng: firstStableLocation!.longitude)
-                        //if distance >= 0.0 {
-                            plotPoint = Delta(lat: current.latitude - firstStableLocation!.latitude,
-                                              lng: current.longitude - firstStableLocation!.longitude,
-                                              ptType: 0, distance: distance)
-                            if self.deltas.deltas.count > 1 {
-                                var totLat = 0.0
-                                var totLng = 0.0
-                                for delta in self.deltas.deltas {
-                                    totLng += delta.lat
-                                    totLng += delta.lng
-                                }
-                                center = CLLocation(latitude: totLat/Double(deltas.deltas.count) - firstStableLocation!.latitude,
-                                                             longitude: totLng/Double(deltas.deltas.count) - firstStableLocation!.longitude)
-                            }
-                        //}
-                    }
-                }
-                lastStableLocation = currentLocation
-                //wait for required successive close locations before setting another stable location
-                stableLocCounter = 0
+                return
             }
         }
         
+        if stableLocCounter > self.requiredStabilityCounter {
+            let location = StableLocation(lat: currentLocation!.latitude, lng: currentLocation!.longitude, ptType: 0)
+            self.stableLocations.locations.append(location)
+            stableLocCounter = 0
+        }
+        
         DispatchQueue.main.async { [self] in
-            var deltaStr = ""
             let numberFormatter = NumberFormatter()
             numberFormatter.numberStyle = .decimal
             numberFormatter.maximumFractionDigits = 1
-            deltaStr = numberFormatter.string(from: NSNumber(value: deltaFromLast ?? 0)) ?? ""
-            if let plotPoint = plotPoint {
-                self.deltas.deltas.append(plotPoint)
-                self.deltas.deltaCnt += 1
-                if let center = center {
-                    //self.centerPlotPoint.lat = center.coordinate.latitude
-                    //self.centerPlotPoint.lng = center.coordinate.longitude
+            let deltaStr = numberFormatter.string(from: NSNumber(value: deltaFromLast ?? 0)) ?? ""
+            
+            //display locations are relative to the 0 element
+            self.displayLocations = []
+            
+            var avgDist = 0.0
+            if self.stableLocations.locations.count > 0 {
+                if self.stableLocations.locations.count == 1 {
+                    self.displayLocations.append(StableLocation(lat: 0, lng: 0, ptType: 0))
+                }
+                else {
+                    let firstLocation = self.stableLocations.locations[0]
+                    var totLatitude = 0.0
+                    var totLongitude = 0.0
+                    var ctr = 0
+                    for location in self.stableLocations.locations {
+                        self.displayLocations.append(StableLocation(lat: location.latitude-firstLocation.latitude,
+                                                                    lng: location.longitude-firstLocation.longitude,
+                                                                    ptType: ctr == self.stableLocations.locations.count-1 ? 2 : 1))
+                        totLatitude += location.latitude
+                        totLongitude += location.longitude
+                        ctr += 1
+                    }
+                    //add calculated center GPS reading location
+                    let avgLatitude = totLatitude / Double(stableLocations.locations.count)
+                    let avgLongitude = totLongitude / Double(stableLocations.locations.count)
+                    self.bestLocation = CLLocationCoordinate2D(latitude: avgLatitude, longitude: avgLongitude)
+                    //StableLocation(lat: avgLatitude, lng: avgLongitude, ptType: 0)
+                    self.displayLocations.append(StableLocation(lat: avgLatitude - firstLocation.latitude,
+                                                                lng: avgLongitude - firstLocation.longitude, ptType: 3))
+                    //average distances from center
+                    var totalDistance = 0.0
+                    for location in self.stableLocations.locations {
+                        let dist = self.distance(startLat: location.latitude, startLng: location.longitude,
+                                                 endLat: self.bestLocation!.latitude, endLng: self.bestLocation!.longitude)
+                        totalDistance += dist
+                    }
+                    avgDist = totalDistance / Double(self.stableLocations.locations.count)
                 }
             }
-            else {
-                if self.deltas.deltas.count == 0 {
-                    self.deltas.deltas.append(Delta(lat: 0, lng: 0, ptType: 1, distance: 0.0))
-                    self.deltas.deltaCnt = self.deltas.deltas.count
-                }
-            }
-            self.locationIsStable = self.lastStableLocation != nil
-            self.setStatus("Count:\(self.locationReadCount) Delta:" + (deltaStr) + " Consec:" + String(self.stableLocCounter))
+
+            self.locationIsStable = self.stableLocations.locations.count > 0
+            self.stableLocationsCount = self.stableLocations.locations.count
+            //self.setStatus("Count:\(self.locationReadCount) Delta:" + (deltaStr) + " StableCtr:" + String(self.stableLocCounter) + " Dist:" + String(avgDist))
+            self.setStatus("Count:\(self.locationReadCount) StableCtr:" + String(self.stableLocCounter) +
+                           " Points:" + String(self.stableLocations.locations.count) +
+                           " Dist:" + String(format: "%.1f", avgDist))
         }
     }
             

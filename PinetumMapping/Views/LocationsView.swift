@@ -16,9 +16,9 @@ struct LocationsView: View {
     @State private var isPresentingDeleteLocation = false
 
     func delete(at offsets: IndexSet) {
-        if let index = offsets.min() {
-            locations.deleteLocation(row: index)
-        }
+        //if let index = offsets.min() {
+        locations.deleteLocation(indexSet: offsets)
+        //}
         //locations.remove(atOffsets: offsets)
     }
     
@@ -29,11 +29,11 @@ struct LocationsView: View {
         formatter.dateFormat = "MMM-dd HH:mm"
         let dateString = formatter.string(from: now)
         var ret = rec.locationName + "\t" + dateString + "\t" + rec.visits[0].deviceName
-        if let loc = locationManager.currentLocation {
+        if let bestLoc = locationManager.bestLocation {
             ret += "\nDist to current:" + String(format: "%.1f",
                                      locationManager.distance(startLat:rec.visits[0].latitude, startLng:rec.visits[0].longitude,
-                                                              endLat: loc.latitude,
-                                                              endLng: loc.longitude))
+                                                              endLat: bestLoc.latitude,
+                                                              endLng: bestLoc.longitude))
         }
         else {
             ret += " dist:Unknown"

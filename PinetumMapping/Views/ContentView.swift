@@ -30,12 +30,11 @@ struct GPSReadView: View {
     @ObservedObject var locationManager = LocationManager.shared
     @ObservedObject var locations = Locations.shared
     @ObservedObject var persistence = GPSPersistence.shared
-    @ObservedObject var deltas = LocationManager.shared.deltas
     
     @State private var savePopup = false
     @State private var savePopup1 = false
     @State private var locationName: String = ""
-    @State private var addDirections = false
+    @State private var resetGPS = false
     @State var showingDeviceNamePopover = false
     @State var deviceName: String = ""
     @State private var stability: Double = 4
@@ -44,7 +43,7 @@ struct GPSReadView: View {
         return String(format: "%.5f", l.latitude)+",  "+String(format: "%.5f", l.longitude)
     }
     
-    func saveForm(cords:CLLocationCoordinate2D?) -> some View {
+    func saveForm(location:CLLocationCoordinate2D) -> some View {
         Form {
             VStack {
                 VStack(alignment: .center) {
@@ -56,8 +55,9 @@ struct GPSReadView: View {
                         .textFieldStyle(.roundedBorder)
                         .multilineTextAlignment(.center)
                         .padding()
-//                    Toggle("Add Directions?", isOn: $addDirections)
-//                        .padding()
+                    Toggle("Reset GPS?", isOn: $resetGPS)
+                        .padding()
+                    Spacer()
                 }
                 
                 HStack {
@@ -67,18 +67,19 @@ struct GPSReadView: View {
                     }
                     Spacer()
                     Button("Save") {
-                        if let saveCords = cords {
+                        //if let location = location {
                             let rec = LocationRecord(
                                 id: UUID().uuidString,
                                 locationName: locationName,
                                 datetime: Date().timeIntervalSince1970,
-                                lat: saveCords.latitude, lng: saveCords.longitude)
+                                lat: location.latitude, lng: location.longitude)
                             self.locations.addLocation(location: rec)
-                            //locationManager.resetLastStableLocation()
-                        }
+                            if resetGPS {
+                                locationManager.reset()
+                            }
+                        //}
                         savePopup = false
                     }
-                    .disabled(cords == nil)
                     .disabled(locationName.count == 0)
                     Spacer()
                 }
@@ -94,7 +95,7 @@ struct GPSReadView: View {
                 }
             }
             .popover(isPresented: $savePopup) {
-                saveForm(cords: locationManager.lastStableLocation!)
+                saveForm(location: locationManager.bestLocation!)
             }
         }
     }
@@ -102,19 +103,23 @@ struct GPSReadView: View {
     // =============== 2D plot ==========================
 
     struct LocationPointsView: View {
-        @State var count: Int
-        @ObservedObject var deltas = LocationManager.shared.deltas
-        //@ObservedObject var center:Delta = LocationManager.shared.centerPlotPoint
+        @State var count:Int
+        @ObservedObject var count1 = LocationManager.shared
+        @State var locationManager:LocationManager = LocationManager.shared
         private let diameter = 12.0
         
         func scale(dimension: Double) -> Double {
+            if locationManager.stableLocationsCount <= 1 {
+                return 0
+            }
             var max = 0.0
-            for delta in deltas.deltas {
-                if abs(delta.lat) > max {
-                    max = abs(delta.lat)
+            let center = locationManager.displayLocations[0]
+            for location in locationManager.displayLocations {
+                if abs(location.latitude - center.latitude) > max {
+                    max = abs(location.latitude - center.latitude)
                 }
-                if abs(delta.lng) > max {
-                    max = abs(delta.lng)
+                if abs(location.longitude - center.longitude) > max {
+                    max = abs(location.longitude - center.longitude)
                 }
             }
             var scale:Double
@@ -128,28 +133,32 @@ struct GPSReadView: View {
             return scale
         }
         
-        func x(_ delta: Delta, width: Double) -> Double {
+        func x(_ location: StableLocation, width: Double) -> Double {
             let offset = width/2.0
-            let res = (scale(dimension: width) * delta.lat) + offset
+            //let center = locationManager.stableLocations.locations[0]
+            let res = (scale(dimension: width) * (location.latitude)) + offset
             return res
         }
         
-        func y(_ delta: Delta, height: Double) -> Double {
+        func y(_ location: StableLocation, height: Double) -> Double {
             let offset = height/2
-            //let xs = locationManager.centerPlotPoint
-            return scale(dimension: height) * delta.lng + offset
+            //let center = locationManager.stableLocations.locations[0]
+            return scale(dimension: height) * (location.longitude) + offset
         }
 
         func color(_ plotType:Int) -> Color {
             switch plotType {
-//            case 2:
-//                return Color(.blue)
+            case 0:
+                return Color(.green)
             case 1:
+                return Color(.blue)
+            case 2:
+                return Color(.cyan)
+            case 3:
                 return Color(.red)
             default:
-                return Color(.green)
+                return Color(.black)
             }
-
         }
         
         var body: some View {
@@ -157,14 +166,12 @@ struct GPSReadView: View {
                 VStack {
                     ZStack {
                         //Rectangle().stroke(Color.gray, lineWidth: 3.0).frame(width: 300, height: 300, alignment: .center)
-                        ForEach(0..<deltas.deltaCnt, id: \.self) { idx in
-                            if deltas.deltas[idx].ptType >= 0 {
-                                Circle()
-                                    .fill(color(deltas.deltas[idx].ptType))
-                                    .frame(width: diameter, height: diameter)
-                                    .position(x: x(deltas.deltas[idx], width: geometry.size.width),
-                                              y: y(deltas.deltas[idx], height: geometry.size.height))
-                            }
+                        ForEach(0..<locationManager.displayLocations.count, id: \.self) { idx in
+                            Circle()
+                                .fill(color(locationManager.displayLocations[idx].ptType))
+                                .frame(width: diameter, height: diameter)
+                                .position(x: x(locationManager.displayLocations[idx], width: geometry.size.width),
+                                          y: y(locationManager.displayLocations[idx], height: geometry.size.height))
                         }
 //                        Circle()
 //                            .fill(.blue)
@@ -186,7 +193,8 @@ struct GPSReadView: View {
             //Text("Device Name: " + (self.persistence.getDeviceName()))
             if let message = locationManager.status {
                 Spacer()
-                Text("Location: " + message)//.font(.)
+                //Text("Location: " + message)//.font(.)
+                Text(message)//.font(.)
             }
             if let message = persistence.status {
                 Spacer()
@@ -208,7 +216,7 @@ struct GPSReadView: View {
             
             VStack {
                 Spacer()
-                LocationPointsView(count: deltas.deltaCnt)
+                LocationPointsView(count: locationManager.stableLocationsCount)
                 Spacer()
                 HStack {
                     Spacer()
@@ -217,7 +225,7 @@ struct GPSReadView: View {
                     }
                     .disabled(!locationManager.locationIsStable)
                     .popover(isPresented: $savePopup) {
-                        saveForm(cords: locationManager.lastStableLocation)
+                        saveForm(location: locationManager.bestLocation!)
                     }
                     Spacer()
                     Button("Reset GPS") {
