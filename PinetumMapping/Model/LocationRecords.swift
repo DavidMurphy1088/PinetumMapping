@@ -2,8 +2,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class VisitRecord : Codable, Hashable {
-    //:Encodable, Hashable, Comparable, ObservableObject {
+class LocationVisitRecord : Codable, Hashable {
     var deviceName:String
     var datetime:TimeInterval
     var latitude:Double
@@ -18,11 +17,11 @@ class VisitRecord : Codable, Hashable {
         self.bearing = 0
     }
     
-    static func == (lhs: VisitRecord, rhs: VisitRecord) -> Bool {
+    static func == (lhs: LocationVisitRecord, rhs: LocationVisitRecord) -> Bool {
         return lhs.datetime < rhs.datetime
     }
     
-    static func < (lhs: VisitRecord, rhs: VisitRecord) -> Bool {
+    static func < (lhs: LocationVisitRecord, rhs: LocationVisitRecord) -> Bool {
         return lhs.datetime < rhs.datetime
     }
     
@@ -31,9 +30,9 @@ class VisitRecord : Codable, Hashable {
     }
 }
 
-class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObject, Encodable, Decodable, Comparable, ObservableObject {
-    private var id:String
-    public var visits : [VisitRecord] = []
+class LocationRecord : NSObject, Codable, Comparable, ObservableObject, Identifiable {
+    internal var id:String
+    public var visits : [LocationVisitRecord] = []
     var locationName:String
     var spare:String
     
@@ -42,7 +41,7 @@ class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObj
         self.locationName = locationName
         self.visits = []
         self.spare = ""
-        self.visits.append(VisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
+        self.visits.append(LocationVisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
     }
         
     func getID() -> String {
@@ -59,16 +58,15 @@ class LocationRecord : NSObject, Codable, Comparable, ObservableObject { //NSObj
     }
     
     static func == (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
-        //return lhs.locationName == rhs.locationName && lhs.visits[0].datetime == rhs.visits[0].datetime
         return lhs.id == rhs.id
     }
     
 }
 
-class Locations: NSObject, ObservableObject {
-    static public let shared = Locations()
+class LocationRecords: NSObject, ObservableObject {
+    static public let shared = LocationRecords()
     
-    @Published private var locations : [LocationRecord] = []
+    @Published var locations : [LocationRecord] = []
     @Published var status: String?
     
     override init() {
@@ -99,7 +97,7 @@ class Locations: NSObject, ObservableObject {
         }
     }
 
-    func addVisit(location:LocationRecord, visit:VisitRecord) {
+    func addVisit(location:LocationRecord, visit:LocationVisitRecord) {
         DispatchQueue.main.async {
             location.visits.append(visit)
             GPSPersistence.shared.saveLocation(location: location)
@@ -113,17 +111,22 @@ class Locations: NSObject, ObservableObject {
         }
     }
     
-    func deleteLocation(indexSet: IndexSet) {
+    func deleteLocation(deleteLocation:LocationRecord) {
         DispatchQueue.main.async {
-            if indexSet.count == 1 {
-                if let row = indexSet.min() {
-                    let delLoc = self.locations[row]
-                    let name = delLoc.locationName
-                    self.locations.remove(at: row)
-                    print("========......start", indexSet.startIndex, "end", indexSet.endIndex, "count", indexSet.count, indexSet.min(), indexSet.max())
-                    GPSPersistence.shared.deleteLocation(locationId: delLoc.getID())
-                    self.setStatus("Deleted \(name)")
+            //if indexSet.count == 1 {
+                //if let row = indexSet.min() {
+                    //let delLoc = self.locations[row]
+                    //let name = delLoc.locationName
+                    //print("deleteLocation", row, delLoc.locationName, delLoc.getID())
+            var i = 0
+            for loc in self.locations{
+                if loc.getID() == deleteLocation.getID() {
+                    self.locations.remove(at: i)
+                    GPSPersistence.shared.deleteLocation(locationId: deleteLocation.getID())
+                    self.setStatus("Deleted \(deleteLocation.locationName)")
+                    break
                 }
+                i+=1
             }
         }
     }

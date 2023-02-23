@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class StableLocation {
+class StableGPSLocation {
     var latitude:Double
     var longitude:Double
     var ptType:Int
@@ -14,8 +14,8 @@ class StableLocation {
     }
 }
 
-class StableLocations {
-    public var locations:[StableLocation] = []
+class StableGPSLocations {
+    public var locations:[StableGPSLocation] = []
 }
 
 final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -26,13 +26,13 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var locationIsStable: Bool = false
     @Published var stableLocationsCount = 0
 
-    public var displayLocations: [StableLocation] = []
+    public var displayLocations: [StableGPSLocation] = []
     public var currentLocation: CLLocationCoordinate2D?
-    public var bestLocation: CLLocationCoordinate2D? //average of all stable location GPS reads
-    public var requiredStabilityCounter:Int = 4
+    public var requiredStabilityCounter:Int = 4 //TODO
 
+    private var bestLocation: CLLocationCoordinate2D? //average of all stable location GPS reads
     private let locationManager = CLLocationManager()
-    private var stableLocations: StableLocations = StableLocations()
+    private var stableLocations: StableGPSLocations = StableGPSLocations()
     private var locationReadCount = 0
     private var lastLocation: CLLocationCoordinate2D?
     private var stableLocCounter:Int = 0 //counts # of successive GPS readings that have not changed location much
@@ -52,6 +52,11 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
     }
     
+    func getBestLocation() -> CLLocationCoordinate2D? {
+        return lastLocation
+        //return self.bestLocation //TODO
+    }
+    
     func reset() {
         stableLocCounter = 0
         stableLocations.locations = []
@@ -66,14 +71,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.stopUpdatingHeading()
         self.setStatus("Location Manager was reset")
     }
-
-//    func getLastStableLocation() -> StableLocation? {
-//        if stableLocations.locations.count > 0 {
-//            return stableLocations.locations[stableLocations.locations.count - 1]
-//        }
-//        return nil
-//    }
-
+    
     private func setStatus(_ msg: String) {
         DispatchQueue.main.async {
             self.status = msg
@@ -110,7 +108,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 }
             }
         }
-
         if let deltaFromLast = deltaFromLast {
             if deltaFromLast < 1.0 { //todo
                 stableLocCounter += 1
@@ -120,9 +117,8 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 return
             }
         }
-        
-        if stableLocCounter > self.requiredStabilityCounter {
-            let location = StableLocation(lat: currentLocation!.latitude, lng: currentLocation!.longitude, ptType: 0)
+        if stableLocCounter >= self.requiredStabilityCounter {
+            let location = StableGPSLocation(lat: currentLocation!.latitude, lng: currentLocation!.longitude, ptType: 0)
             self.stableLocations.locations.append(location)
             stableLocCounter = 0
         }
@@ -131,7 +127,6 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             let numberFormatter = NumberFormatter()
             numberFormatter.numberStyle = .decimal
             numberFormatter.maximumFractionDigits = 1
-            let deltaStr = numberFormatter.string(from: NSNumber(value: deltaFromLast ?? 0)) ?? ""
             
             //display locations are relative to the 0 element
             self.displayLocations = []
@@ -139,7 +134,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
             var avgDist = 0.0
             if self.stableLocations.locations.count > 0 {
                 if self.stableLocations.locations.count == 1 {
-                    self.displayLocations.append(StableLocation(lat: 0, lng: 0, ptType: 0))
+                    self.displayLocations.append(StableGPSLocation(lat: 0, lng: 0, ptType: 0))
                 }
                 else {
                     let firstLocation = self.stableLocations.locations[0]
@@ -147,7 +142,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                     var totLongitude = 0.0
                     var ctr = 0
                     for location in self.stableLocations.locations {
-                        self.displayLocations.append(StableLocation(lat: location.latitude-firstLocation.latitude,
+                        self.displayLocations.append(StableGPSLocation(lat: location.latitude-firstLocation.latitude,
                                                                     lng: location.longitude-firstLocation.longitude,
                                                                     ptType: ctr == self.stableLocations.locations.count-1 ? 2 : 1))
                         totLatitude += location.latitude
@@ -159,7 +154,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                     let avgLongitude = totLongitude / Double(stableLocations.locations.count)
                     self.bestLocation = CLLocationCoordinate2D(latitude: avgLatitude, longitude: avgLongitude)
                     //StableLocation(lat: avgLatitude, lng: avgLongitude, ptType: 0)
-                    self.displayLocations.append(StableLocation(lat: avgLatitude - firstLocation.latitude,
+                    self.displayLocations.append(StableGPSLocation(lat: avgLatitude - firstLocation.latitude,
                                                                 lng: avgLongitude - firstLocation.longitude, ptType: 3))
                     //average distances from center
                     var totalDistance = 0.0
@@ -174,9 +169,11 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
             self.locationIsStable = self.stableLocations.locations.count > 0
             self.stableLocationsCount = self.stableLocations.locations.count
-            //self.setStatus("Count:\(self.locationReadCount) Delta:" + (deltaStr) + " StableCtr:" + String(self.stableLocCounter) + " Dist:" + String(avgDist))
-            self.setStatus("Count:\(self.locationReadCount) StableCtr:" + String(self.stableLocCounter) +
-                           " Points:" + String(self.stableLocations.locations.count) +
+            //let delta = numberFormatter.string(from: NSNumber(value: deltaFromLast ?? 0)) ?? ""
+            self.setStatus("Cnt:\(self.locationReadCount) " +
+                           //" Δ" + delta +
+                           " StableCtr:" + String(self.stableLocCounter) +
+                           " Pts:" + String(self.stableLocations.locations.count) +
                            " Dist:" + String(format: "%.1f", avgDist))
         }
     }

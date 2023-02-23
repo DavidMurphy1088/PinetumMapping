@@ -36,8 +36,10 @@
 		7B37CCEA299259D300B201EC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCE9299259D300B201EC /* FirebaseStorage */; };
 		7B37CCEC299259D300B201EC /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCEB299259D300B201EC /* FirebaseStorageCombine-Community */; };
 		7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37CCED2992622F00B201EC /* GPSPersistence.swift */; };
+		7B8D87E429A5F29400FA3C43 /* SaveLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8D87E329A5F29400FA3C43 /* SaveLocationView.swift */; };
+		7B8D87E629A5F68400FA3C43 /* LocationPointsPlotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8D87E529A5F68400FA3C43 /* LocationPointsPlotView.swift */; };
 		7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */; };
-		7BA33E31299237820089FAF3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E30299237820089FAF3 /* ContentView.swift */; };
+		7BA33E31299237820089FAF3 /* MappingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E30299237820089FAF3 /* MappingView.swift */; };
 		7BA33E33299237840089FAF3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BA33E32299237840089FAF3 /* Assets.xcassets */; };
 		7BA33E36299237840089FAF3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BA33E35299237840089FAF3 /* Preview Assets.xcassets */; };
 		7BA33E38299237840089FAF3 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E37299237840089FAF3 /* Persistence.swift */; };
@@ -45,17 +47,26 @@
 		7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E42299238F00089FAF3 /* LocationManager.swift */; };
 		7BA33E452992396D0089FAF3 /* LocationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E442992396D0089FAF3 /* LocationsView.swift */; };
 		7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E46299239960089FAF3 /* LocationVisitsView.swift */; };
-		7BCAAC80299B70D700CB4B53 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC7F299B70D700CB4B53 /* Locations.swift */; };
+		7BCAAC80299B70D700CB4B53 /* LocationRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */; };
 		7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC81299B73CE00CB4B53 /* Util.swift */; };
+		7BEF6F1629A75E8900DCBC4E /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1029A75E8800DCBC4E /* CameraService.swift */; };
+		7BEF6F1729A75E8900DCBC4E /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1129A75E8800DCBC4E /* CameraPreview.swift */; };
+		7BEF6F1829A75E8900DCBC4E /* ImageResizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1229A75E8800DCBC4E /* ImageResizer.swift */; };
+		7BEF6F1929A75E8900DCBC4E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1329A75E8900DCBC4E /* ContentView.swift */; };
+		7BEF6F1A29A75E8900DCBC4E /* CameraService+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1429A75E8900DCBC4E /* CameraService+Extensions.swift */; };
+		7BEF6F1B29A75E8900DCBC4E /* CameraService+Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1529A75E8900DCBC4E /* CameraService+Enums.swift */; };
+		7BEF6F1D29A75E9B00DCBC4E /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1C29A75E9B00DCBC4E /* PhotoCaptureProcessor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PinetumMapping.entitlements; sourceTree = "<group>"; };
 		7B37CCB42992589500B201EC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		7B37CCED2992622F00B201EC /* GPSPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSPersistence.swift; sourceTree = "<group>"; };
+		7B8D87E329A5F29400FA3C43 /* SaveLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLocationView.swift; sourceTree = "<group>"; };
+		7B8D87E529A5F68400FA3C43 /* LocationPointsPlotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPointsPlotView.swift; sourceTree = "<group>"; };
 		7BA33E2B299237820089FAF3 /* PinetumMapping.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PinetumMapping.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinetumMappingApp.swift; sourceTree = "<group>"; };
-		7BA33E30299237820089FAF3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7BA33E30299237820089FAF3 /* MappingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappingView.swift; sourceTree = "<group>"; };
 		7BA33E32299237840089FAF3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7BA33E35299237840089FAF3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7BA33E37299237840089FAF3 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -64,8 +75,15 @@
 		7BA33E42299238F00089FAF3 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7BA33E442992396D0089FAF3 /* LocationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsView.swift; sourceTree = "<group>"; };
 		7BA33E46299239960089FAF3 /* LocationVisitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationVisitsView.swift; sourceTree = "<group>"; };
-		7BCAAC7F299B70D700CB4B53 /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
+		7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRecords.swift; sourceTree = "<group>"; };
 		7BCAAC81299B73CE00CB4B53 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
+		7BEF6F1029A75E8800DCBC4E /* CameraService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraService.swift; path = "../../../SwiftCamera-main/SwiftCamera/CameraService.swift"; sourceTree = "<group>"; };
+		7BEF6F1129A75E8800DCBC4E /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraPreview.swift; path = "../../../SwiftCamera-main/SwiftCamera/CameraPreview.swift"; sourceTree = "<group>"; };
+		7BEF6F1229A75E8800DCBC4E /* ImageResizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageResizer.swift; path = "../../../SwiftCamera-main/SwiftCamera/ImageResizer.swift"; sourceTree = "<group>"; };
+		7BEF6F1329A75E8900DCBC4E /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = "../../../SwiftCamera-main/SwiftCamera/ContentView.swift"; sourceTree = "<group>"; };
+		7BEF6F1429A75E8900DCBC4E /* CameraService+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CameraService+Extensions.swift"; path = "../../../SwiftCamera-main/SwiftCamera/CameraService+Extensions.swift"; sourceTree = "<group>"; };
+		7BEF6F1529A75E8900DCBC4E /* CameraService+Enums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CameraService+Enums.swift"; path = "../../../SwiftCamera-main/SwiftCamera/CameraService+Enums.swift"; sourceTree = "<group>"; };
+		7BEF6F1C29A75E9B00DCBC4E /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PhotoCaptureProcessor.swift; path = "../../../SwiftCamera-main/SwiftCamera/PhotoCaptureProcessor.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +124,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7B8D87E729A5FEDD00FA3C43 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				7BEF6F1129A75E8800DCBC4E /* CameraPreview.swift */,
+				7BEF6F1029A75E8800DCBC4E /* CameraService.swift */,
+				7BEF6F1529A75E8900DCBC4E /* CameraService+Enums.swift */,
+				7BEF6F1429A75E8900DCBC4E /* CameraService+Extensions.swift */,
+				7BEF6F1C29A75E9B00DCBC4E /* PhotoCaptureProcessor.swift */,
+				7BEF6F1329A75E8900DCBC4E /* ContentView.swift */,
+				7BEF6F1229A75E8800DCBC4E /* ImageResizer.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
 		7BA33E22299237820089FAF3 = {
 			isa = PBXGroup;
 			children = (
@@ -125,16 +157,17 @@
 		7BA33E2D299237820089FAF3 /* PinetumMapping */ = {
 			isa = PBXGroup;
 			children = (
-				7BCAAC7D299B707600CB4B53 /* Model */,
-				7BCAAC7E299B708E00CB4B53 /* Views */,
 				7BA33E32299237840089FAF3 /* Assets.xcassets */,
+				7B8D87E729A5FEDD00FA3C43 /* Camera */,
 				7B37CCB42992589500B201EC /* GoogleService-Info.plist */,
 				7BA33E3C299237840089FAF3 /* Info.plist */,
+				7BCAAC7D299B707600CB4B53 /* Model */,
 				7BA33E37299237840089FAF3 /* Persistence.swift */,
 				7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */,
 				7BA33E39299237840089FAF3 /* PinetumMapping.xcdatamodeld */,
 				7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */,
 				7BA33E34299237840089FAF3 /* Preview Content */,
+				7BCAAC7E299B708E00CB4B53 /* Views */,
 			);
 			path = PinetumMapping;
 			sourceTree = "<group>";
@@ -152,7 +185,7 @@
 			children = (
 				7B37CCED2992622F00B201EC /* GPSPersistence.swift */,
 				7BA33E42299238F00089FAF3 /* LocationManager.swift */,
-				7BCAAC7F299B70D700CB4B53 /* Locations.swift */,
+				7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */,
 				7BCAAC81299B73CE00CB4B53 /* Util.swift */,
 			);
 			path = Model;
@@ -161,9 +194,11 @@
 		7BCAAC7E299B708E00CB4B53 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				7BA33E30299237820089FAF3 /* ContentView.swift */,
+				7B8D87E529A5F68400FA3C43 /* LocationPointsPlotView.swift */,
 				7BA33E442992396D0089FAF3 /* LocationsView.swift */,
 				7BA33E46299239960089FAF3 /* LocationVisitsView.swift */,
+				7BA33E30299237820089FAF3 /* MappingView.swift */,
+				7B8D87E329A5F29400FA3C43 /* SaveLocationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -271,16 +306,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7BCAAC80299B70D700CB4B53 /* Locations.swift in Sources */,
+				7BEF6F1D29A75E9B00DCBC4E /* PhotoCaptureProcessor.swift in Sources */,
+				7BCAAC80299B70D700CB4B53 /* LocationRecords.swift in Sources */,
+				7B8D87E629A5F68400FA3C43 /* LocationPointsPlotView.swift in Sources */,
+				7BEF6F1929A75E8900DCBC4E /* ContentView.swift in Sources */,
 				7BA33E38299237840089FAF3 /* Persistence.swift in Sources */,
+				7BEF6F1729A75E8900DCBC4E /* CameraPreview.swift in Sources */,
 				7BA33E452992396D0089FAF3 /* LocationsView.swift in Sources */,
 				7BA33E3B299237840089FAF3 /* PinetumMapping.xcdatamodeld in Sources */,
 				7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */,
-				7BA33E31299237820089FAF3 /* ContentView.swift in Sources */,
+				7BEF6F1A29A75E8900DCBC4E /* CameraService+Extensions.swift in Sources */,
+				7BEF6F1829A75E8900DCBC4E /* ImageResizer.swift in Sources */,
+				7BEF6F1629A75E8900DCBC4E /* CameraService.swift in Sources */,
+				7B8D87E429A5F29400FA3C43 /* SaveLocationView.swift in Sources */,
+				7BA33E31299237820089FAF3 /* MappingView.swift in Sources */,
 				7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */,
 				7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */,
 				7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */,
 				7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */,
+				7BEF6F1B29A75E8900DCBC4E /* CameraService+Enums.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,14 +454,16 @@
 				CODE_SIGN_ENTITLEMENTS = PinetumMapping/PinetumMapping.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"PinetumMapping/Preview Content\"";
 				DEVELOPMENT_TEAM = 2B6A6N9QBQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pinetum app needs access to your camera to capture Pinetum photos";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Pinetum app needs access to your camera to capture Pinetum photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -446,10 +492,11 @@
 				DEVELOPMENT_TEAM = 2B6A6N9QBQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pinetum app needs access to your camera to capture Pinetum photos";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Pinetum app needs access to your camera to capture Pinetum photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
