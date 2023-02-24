@@ -13,6 +13,7 @@ struct SaveLocationView : View {
     @State var locationManager = LocationManager.shared
     @State var locationName: String = ""
     @State var cameraIsDisabled = true
+    @State var pictureSet:PictureSet = PictureSet(pictures: [])
     
     var body: some View {
         VStack(alignment: .center) {
@@ -28,7 +29,7 @@ struct SaveLocationView : View {
                 cameraIsDisabled.toggle()
             }
             if !cameraIsDisabled {
-                CameraView()
+                CameraView(pictureSet: pictureSet)
             }
             Spacer()
             HStack {
@@ -38,15 +39,15 @@ struct SaveLocationView : View {
                 }
                 Spacer()
                 Button("Save") {
+                    print("Pics", pictureSet.pictures.count)
                     let location = LocationRecord(
                         id: UUID().uuidString,
                         locationName: locationName,
                         datetime: Date().timeIntervalSince1970,
-                        lat: location.latitude, lng: location.longitude)
-                    //LocationRecords.shared.addLocation(location: location)
-                    //                        if resetGPS {
-                    //                            locationManager.reset()
-                    //                        }
+                        lat: location.latitude, lng: location.longitude,
+                        pictureSet: pictureSet)
+                    LocationRecords.shared.addLocation(location: location)
+                    dismiss()
                 }
                 .disabled(locationName.count == 0)
                 Spacer()

@@ -36,6 +36,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     private var locationReadCount = 0
     private var lastLocation: CLLocationCoordinate2D?
     private var stableLocCounter:Int = 0 //counts # of successive GPS readings that have not changed location much
+    private var lastDelta:Double?
     
     override init() {
         super.init()
@@ -106,6 +107,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                 if deltaFromLast != nil && deltaFromLast!.isNaN {
                     deltaFromLast = 0
                 }
+                self.lastDelta = deltaFromLast
             }
         }
         if let deltaFromLast = deltaFromLast {
@@ -169,12 +171,14 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
 
             self.locationIsStable = self.stableLocations.locations.count > 0
             self.stableLocationsCount = self.stableLocations.locations.count
-            //let delta = numberFormatter.string(from: NSNumber(value: deltaFromLast ?? 0)) ?? ""
-            self.setStatus("Cnt:\(self.locationReadCount) " +
-                           //" Δ" + delta +
-                           " StableCtr:" + String(self.stableLocCounter) +
-                           " Pts:" + String(self.stableLocations.locations.count) +
-                           " Dist:" + String(format: "%.1f", avgDist))
+            var logMsg = "Cnt:\(self.locationReadCount) "
+            if let delta = self.lastDelta {
+                logMsg += " Δ" + (numberFormatter.string(from: NSNumber(value: delta)) ?? "")
+            }
+            logMsg += " StableCtr:" + String(self.stableLocCounter) +
+            " Pts:" + String(self.stableLocations.locations.count) +
+            " Dist:" + String(format: "%.1f", avgDist)
+            self.setStatus(logMsg)
         }
     }
             

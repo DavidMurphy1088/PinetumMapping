@@ -1,6 +1,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseCore
+import FirebaseAuth
 
 class GPSPersistence : NSObject, ObservableObject {
     static public let shared = GPSPersistence()
@@ -56,12 +57,13 @@ class GPSPersistence : NSObject, ObservableObject {
                             let datetime = visitNum["datetime"] as! Double
                             let lat = visitNum["lat"] as! Double
                             let lng = visitNum["lng"] as! Double
+                            let pictureSet = PictureSet(pictures: [])
                             if let location = location {
                                 let visit = LocationVisitRecord(deviceName: visitNum["device"] as! String, datetime: datetime, lat: lat, lng: lng)
                                 location.visits.append(visit)
                             }
                             else {
-                                location = LocationRecord(id:document.documentID, locationName: locationName as! String, datetime: datetime, lat: lat, lng: lng)
+                                location = LocationRecord(id:document.documentID, locationName: locationName as! String, datetime: datetime, lat: lat, lng: lng, pictureSet: pictureSet)
                             }
                             visitCnt += 1
                         }
@@ -82,9 +84,21 @@ class GPSPersistence : NSObject, ObservableObject {
         let doc = collection.document(docId)
         doc.delete()
         doc.setData([
-            "locationName" : location.locationName
+            "locationName" : location.locationName,
         ])
         let ref = collection.document(docId)
+        for picture in location.pictureSet.pictures {
+            let str = picture.base64EncodedString()
+            let start = String.Index(utf16Offset: 0, in: str)
+            let end = String.Index(utf16Offset: 255, in: str)
+            let substring = String(str[start..<end])
+            print("=======> location save, pictures", location.pictureSet.pictures.count, picture.count, substring)
+
+            ref.updateData([
+                "picture" : "PIC\(picture.count)",
+                "pictureData" : substring
+            ])
+        }
         var n = 0
         for visit in location.visits {
             ref.updateData([
@@ -95,6 +109,9 @@ class GPSPersistence : NSObject, ObservableObject {
             n += 1
         }
         self.setStatus("Saved \(location.locationName)")
+        
+        //Firebase Storage
+        let storage = Storage.storage()
     }
     
     func deleteLocation(locationId:String) {

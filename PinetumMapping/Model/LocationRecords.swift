@@ -30,17 +30,26 @@ class LocationVisitRecord : Codable, Hashable {
     }
 }
 
-class LocationRecord : NSObject, Codable, Comparable, ObservableObject, Identifiable {
+class PictureSet {
+    var pictures:[Data] = []
+    init (pictures:[Data] ) {
+        self.pictures = pictures
+    }
+}
+
+class LocationRecord : NSObject, Comparable, ObservableObject, Identifiable { //
     internal var id:String
     public var visits : [LocationVisitRecord] = []
     var locationName:String
     var spare:String
+    var pictureSet:PictureSet
     
-    init(id:String, locationName: String, datetime:TimeInterval, lat: Double, lng: Double) {
+    init(id:String, locationName: String, datetime:TimeInterval, lat: Double, lng: Double, pictureSet:PictureSet) {
         self.id = id
         self.locationName = locationName
         self.visits = []
         self.spare = ""
+        self.pictureSet = pictureSet
         self.visits.append(LocationVisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
     }
         
