@@ -2,6 +2,7 @@ import Foundation
 import FirebaseFirestore
 import FirebaseCore
 import FirebaseAuth
+import FirebaseStorage
 
 class GPSPersistence : NSObject, ObservableObject {
     static public let shared = GPSPersistence()
@@ -87,17 +88,12 @@ class GPSPersistence : NSObject, ObservableObject {
             "locationName" : location.locationName,
         ])
         let ref = collection.document(docId)
+        var i = 0
         for picture in location.pictureSet.pictures {
-            let str = picture.base64EncodedString()
-            let start = String.Index(utf16Offset: 0, in: str)
-            let end = String.Index(utf16Offset: 255, in: str)
-            let substring = String(str[start..<end])
-            print("=======> location save, pictures", location.pictureSet.pictures.count, picture.count, substring)
-
             ref.updateData([
-                "picture" : "PIC\(picture.count)",
-                "pictureData" : substring
+                "pictureData" : "Picture:\(i), size:\(picture.count)",
             ])
+            i += 1
         }
         var n = 0
         for visit in location.visits {
@@ -108,10 +104,44 @@ class GPSPersistence : NSObject, ObservableObject {
             ])
             n += 1
         }
-        self.setStatus("Saved \(location.locationName)")
         
-        //Firebase Storage
+        if location.pictureSet.pictures.count > 0 {
+            DispatchQueue.global(qos: .background).async {
+                self.savePictures(location: location, ref: ref)
+            }
+        }
+        self.setStatus("Saved \(location.locationName)")
+    }
+    
+    func savePictures(location:LocationRecord, ref:DocumentReference) {
+        //https://firebase.google.com/docs/storage/ios/create-reference
         let storage = Storage.storage()
+        let storageRef = storage.reference()
+        let riversRef = storageRef.child("images/\(location.locationName).jpg")
+
+        // Upload the file to the path "images/rivers.jpg"
+        let uploadTask = riversRef.putData(location.pictureSet.pictures[0], metadata: nil) { (metadata, error) in
+            guard let metadata = metadata else {
+                self.status = "Storage save, metadata, \(error?.localizedDescription ?? "?")"
+                //print("============= Uh-oh, an error occurred!", error?.localizedDescription)
+                return
+            }
+            // Metadata contains file metadata such as size, content-type.
+            let size = metadata.size
+            // You can also access to download URL after upload.
+            riversRef.downloadURL { (url, error) in
+                guard let url = url else {
+                    self.status = "Storage save, download URL, \(error?.localizedDescription ?? "?")"
+                    //print("=========== Uh-oh, an error occurred! ......", error?.localizedDescription)
+                    return
+                }
+                let downloadUrl = "\(url)"
+                ref.updateData([
+                    "pictureURL" : downloadUrl
+                    ])
+                    self.status = "Storage, updated:\(location.locationName) URL:\(downloadUrl)"
+            }
+        }
     }
     
     func deleteLocation(locationId:String) {
