@@ -8,6 +8,9 @@ import UIKit
 import FirebaseAnalyticsSwift
 
 struct ContentView: View {
+    @ObservedObject var errors = ErrorHandler.shared
+    @State private var showingAlert = false
+
     var body: some View {
         TabView {
             MappingView()
@@ -20,8 +23,12 @@ struct ContentView: View {
                     Label("Distances", image: "listIcon")
                 }
         }
-        .navigationTitle("GPS Reader")
-        .analyticsScreen(name: "ContentTest")
+        //.navigationTitle("GPS Reader")
+        //.analyticsScreen(name: "ContentTest")
+        //TODO and add to error cases
+        .alert..("Important message", isPresented: $errors.showingAlert) {
+            Button("OK", role: .cancel) { }
+        }
     }
 }
 
@@ -29,7 +36,7 @@ struct MappingView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject var locationManager = LocationManager.shared
     @ObservedObject var locations = LocationRecords.shared
-    @ObservedObject var persistence = GPSPersistence.shared
+    @ObservedObject var persistence = LocationCloudPersistence.shared
     
     @State private var saveLocationPopup = false
 
@@ -37,9 +44,9 @@ struct MappingView: View {
     @State var deviceName: String = ""
     @State private var stability: Double = 0 //todo
     
-    func fmt(_ l: CLLocationCoordinate2D) -> String {
-        return String(format: "%.5f", l.latitude)+",  "+String(format: "%.5f", l.longitude)
-    }
+//    func fmt(_ l: CLLocationCoordinate2D) -> String {
+//        return String(format: "%.5f", l.latitude)+",  "+String(format: "%.5f", l.longitude)
+//    }
 
     func GPSView() -> some View {
         NavigationView {
@@ -53,7 +60,11 @@ struct MappingView: View {
                     Spacer()
                     Text("Persist Mgr: " + message).font(.caption)
                 }
-                
+                if let err = ErrorHandler.shared.error {
+                    Spacer()
+                    Text("Error: " + err).font(.caption)
+                }
+ 
                 if locationManager.currentLocation == nil {
                     Spacer()
                     Text("Start Location Manager") //TODO
@@ -109,6 +120,7 @@ struct MappingView: View {
                 Spacer()
                 Button("Set Device Name") {
                     showingDeviceNamePopover = true
+                    
                 }
                 .padding()
                 .popover(isPresented: $showingDeviceNamePopover) {

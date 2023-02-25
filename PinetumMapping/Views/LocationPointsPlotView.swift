@@ -6,7 +6,6 @@ import CoreLocationUI
 import CoreLocation
 import UIKit
 import FirebaseAnalyticsSwift
-// =============== 2D plot ==========================
 
 struct LocationPointsPlotView: View {
     @State var count:Int

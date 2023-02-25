@@ -31,9 +31,8 @@ struct LocationVisitsView: View {
                     }
                     Spacer()
                     Button("Save") {
-                        let revisitRecord = LocationVisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: NSDate().timeIntervalSince1970, lat: saveLocation.latitude, lng: saveLocation.longitude)
+                        let revisitRecord = LocationVisitRecord(deviceName: LocationCloudPersistence.shared.getDeviceName(), datetime: NSDate().timeIntervalSince1970, lat: saveLocation.latitude, lng: saveLocation.longitude)
                         locations.addVisit(location: location, visit: revisitRecord)
-                        //locationManager.resetLastStableLocation()
                         savePopup = false
                     }
                     .disabled(locationManager.getBestLocation() == nil)
@@ -89,11 +88,24 @@ struct LocationVisitsView: View {
                 Text(message).font(.caption)
             }
 
-            Image("pointer")
-            .resizable()
-            .rotationEffect(.degrees(bearing()))
-            .animation(.easeIn, value: bearing())
-
+//            Image("pointer")
+//            .resizable()
+//            .rotationEffect(.degrees(bearing()))
+//            .animation(.easeIn, value: bearing())
+            
+            if location.pictureSet.pictures.count > 0 {
+                if let imageData = location.pictureSet.pictures[0] {
+                    if let image = UIImage(data: imageData) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fit)
+                        //.frame(width: CGFloat(im.size), alignment: .topLeading)
+                            .border(.blue)
+                    }
+                }
+            }
+            
             List {
                 Text("Visits to this location").font(.title3).bold()
                 ForEach(location.visits, id: \.datetime) { revisit in

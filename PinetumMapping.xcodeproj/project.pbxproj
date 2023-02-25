@@ -35,7 +35,7 @@
 		7B37CCE8299259D300B201EC /* FirebaseRemoteConfigSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCE7299259D300B201EC /* FirebaseRemoteConfigSwift */; };
 		7B37CCEA299259D300B201EC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCE9299259D300B201EC /* FirebaseStorage */; };
 		7B37CCEC299259D300B201EC /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 7B37CCEB299259D300B201EC /* FirebaseStorageCombine-Community */; };
-		7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37CCED2992622F00B201EC /* GPSPersistence.swift */; };
+		7B37CCEE2992622F00B201EC /* LocationCloudPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B37CCED2992622F00B201EC /* LocationCloudPersistence.swift */; };
 		7B8D87E429A5F29400FA3C43 /* SaveLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8D87E329A5F29400FA3C43 /* SaveLocationView.swift */; };
 		7B8D87E629A5F68400FA3C43 /* LocationPointsPlotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8D87E529A5F68400FA3C43 /* LocationPointsPlotView.swift */; };
 		7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */; };
@@ -47,6 +47,7 @@
 		7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E42299238F00089FAF3 /* LocationManager.swift */; };
 		7BA33E452992396D0089FAF3 /* LocationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E442992396D0089FAF3 /* LocationsView.swift */; };
 		7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E46299239960089FAF3 /* LocationVisitsView.swift */; };
+		7BAB587329AA11ED0078B3D5 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */; };
 		7BCAAC80299B70D700CB4B53 /* LocationRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */; };
 		7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC81299B73CE00CB4B53 /* Util.swift */; };
 		7BEF6F1629A75E8900DCBC4E /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1029A75E8800DCBC4E /* CameraService.swift */; };
@@ -61,7 +62,7 @@
 /* Begin PBXFileReference section */
 		7B37CCB329924BB800B201EC /* PinetumMapping.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PinetumMapping.entitlements; sourceTree = "<group>"; };
 		7B37CCB42992589500B201EC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		7B37CCED2992622F00B201EC /* GPSPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSPersistence.swift; sourceTree = "<group>"; };
+		7B37CCED2992622F00B201EC /* LocationCloudPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCloudPersistence.swift; sourceTree = "<group>"; };
 		7B8D87E329A5F29400FA3C43 /* SaveLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLocationView.swift; sourceTree = "<group>"; };
 		7B8D87E529A5F68400FA3C43 /* LocationPointsPlotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPointsPlotView.swift; sourceTree = "<group>"; };
 		7BA33E2B299237820089FAF3 /* PinetumMapping.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PinetumMapping.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +76,7 @@
 		7BA33E42299238F00089FAF3 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7BA33E442992396D0089FAF3 /* LocationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsView.swift; sourceTree = "<group>"; };
 		7BA33E46299239960089FAF3 /* LocationVisitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationVisitsView.swift; sourceTree = "<group>"; };
+		7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
 		7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRecords.swift; sourceTree = "<group>"; };
 		7BCAAC81299B73CE00CB4B53 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		7BEF6F1029A75E8800DCBC4E /* CameraService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraService.swift; path = "../../../SwiftCamera-main/SwiftCamera/CameraService.swift"; sourceTree = "<group>"; };
@@ -124,7 +126,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7B8D87E729A5FEDD00FA3C43 /* Camera */ = {
+		7B8D87E729A5FEDD00FA3C43 /* Views_Camera */ = {
 			isa = PBXGroup;
 			children = (
 				7BEF6F1129A75E8800DCBC4E /* CameraPreview.swift */,
@@ -135,7 +137,7 @@
 				7BEF6F1329A75E8900DCBC4E /* ContentView.swift */,
 				7BEF6F1229A75E8800DCBC4E /* ImageResizer.swift */,
 			);
-			path = Camera;
+			path = Views_Camera;
 			sourceTree = "<group>";
 		};
 		7BA33E22299237820089FAF3 = {
@@ -158,7 +160,6 @@
 			isa = PBXGroup;
 			children = (
 				7BA33E32299237840089FAF3 /* Assets.xcassets */,
-				7B8D87E729A5FEDD00FA3C43 /* Camera */,
 				7B37CCB42992589500B201EC /* GoogleService-Info.plist */,
 				7BA33E3C299237840089FAF3 /* Info.plist */,
 				7BCAAC7D299B707600CB4B53 /* Model */,
@@ -168,6 +169,7 @@
 				7BA33E2E299237820089FAF3 /* PinetumMappingApp.swift */,
 				7BA33E34299237840089FAF3 /* Preview Content */,
 				7BCAAC7E299B708E00CB4B53 /* Views */,
+				7B8D87E729A5FEDD00FA3C43 /* Views_Camera */,
 			);
 			path = PinetumMapping;
 			sourceTree = "<group>";
@@ -183,10 +185,11 @@
 		7BCAAC7D299B707600CB4B53 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				7B37CCED2992622F00B201EC /* GPSPersistence.swift */,
+				7B37CCED2992622F00B201EC /* LocationCloudPersistence.swift */,
 				7BA33E42299238F00089FAF3 /* LocationManager.swift */,
 				7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */,
 				7BCAAC81299B73CE00CB4B53 /* Util.swift */,
+				7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -323,7 +326,8 @@
 				7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */,
 				7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */,
 				7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */,
-				7B37CCEE2992622F00B201EC /* GPSPersistence.swift in Sources */,
+				7BAB587329AA11ED0078B3D5 /* ErrorHandler.swift in Sources */,
+				7B37CCEE2992622F00B201EC /* LocationCloudPersistence.swift in Sources */,
 				7BEF6F1B29A75E8900DCBC4E /* CameraService+Enums.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

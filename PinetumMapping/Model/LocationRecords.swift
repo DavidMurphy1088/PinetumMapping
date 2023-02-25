@@ -37,20 +37,19 @@ class PictureSet {
     }
 }
 
-class LocationRecord : NSObject, Comparable, ObservableObject, Identifiable { //
+class LocationRecord : NSObject, Comparable, ObservableObject, Identifiable { 
     internal var id:String
     public var visits : [LocationVisitRecord] = []
     var locationName:String
-    var spare:String
+    var pictureURL:String?
     var pictureSet:PictureSet
     
     init(id:String, locationName: String, datetime:TimeInterval, lat: Double, lng: Double, pictureSet:PictureSet) {
         self.id = id
         self.locationName = locationName
         self.visits = []
-        self.spare = ""
         self.pictureSet = pictureSet
-        self.visits.append(LocationVisitRecord(deviceName: GPSPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
+        self.visits.append(LocationVisitRecord(deviceName: LocationCloudPersistence.shared.getDeviceName(), datetime: datetime, lat: lat, lng: lng))
     }
         
     func getID() -> String {
@@ -62,14 +61,18 @@ class LocationRecord : NSObject, Comparable, ObservableObject, Identifiable { //
             return true
         }
         else {
-            return lhs.visits[0].datetime < rhs.visits[0].datetime
+            if lhs.locationName == rhs.locationName {
+                return lhs.visits[0].datetime < rhs.visits[0].datetime
+            }
+            else {
+                return false
+            }
         }
     }
     
     static func == (lhs: LocationRecord, rhs: LocationRecord) -> Bool {
         return lhs.id == rhs.id
     }
-    
 }
 
 class LocationRecords: NSObject, ObservableObject {
@@ -79,7 +82,7 @@ class LocationRecords: NSObject, ObservableObject {
     @Published var status: String?
     
     override init() {
-        GPSPersistence.shared.getLocations()
+        LocationCloudPersistence.shared.getLocations()
     }
     
     public func getLocations() -> [LocationRecord] {
@@ -101,7 +104,7 @@ class LocationRecords: NSObject, ObservableObject {
     func addLocation(location: LocationRecord) {
         DispatchQueue.main.async {
             self.locations.append(location)
-            GPSPersistence.shared.saveLocation(location: location)
+            LocationCloudPersistence.shared.saveLocation(location: location)
             self.setStatus("Saved \(location.locationName)")
         }
     }
@@ -109,14 +112,14 @@ class LocationRecords: NSObject, ObservableObject {
     func addVisit(location:LocationRecord, visit:LocationVisitRecord) {
         DispatchQueue.main.async {
             location.visits.append(visit)
-            GPSPersistence.shared.saveLocation(location: location)
+            LocationCloudPersistence.shared.saveLocation(location: location)
         }
     }
     
     func deleteVisit(location:LocationRecord, visitNum:Int) {
         DispatchQueue.main.async {
             location.visits.remove(at: visitNum)
-            GPSPersistence.shared.saveLocation(location: location)
+            LocationCloudPersistence.shared.saveLocation(location: location)
         }
     }
     
@@ -131,7 +134,7 @@ class LocationRecords: NSObject, ObservableObject {
             for loc in self.locations{
                 if loc.getID() == deleteLocation.getID() {
                     self.locations.remove(at: i)
-                    GPSPersistence.shared.deleteLocation(locationId: deleteLocation.getID())
+                    LocationCloudPersistence.shared.deleteLocation(locationId: deleteLocation.getID())
                     self.setStatus("Deleted \(deleteLocation.locationName)")
                     break
                 }

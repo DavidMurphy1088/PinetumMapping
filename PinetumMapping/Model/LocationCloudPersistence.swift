@@ -3,9 +3,10 @@ import FirebaseFirestore
 import FirebaseCore
 import FirebaseAuth
 import FirebaseStorage
+import AVFoundation
 
-class GPSPersistence : NSObject, ObservableObject {
-    static public let shared = GPSPersistence()
+class LocationCloudPersistence : NSObject, ObservableObject {
+    static public let shared = LocationCloudPersistence()
     @Published public var status = ""
     @Published public var deviceName:String?
     
@@ -43,6 +44,7 @@ class GPSPersistence : NSObject, ObservableObject {
     func getLocations() {
         let db = Firestore.firestore()
         db.collection("locations").getDocuments() { (querySnapshot, err) in
+            var pictureLocations:[LocationRecord] = []
             var locationCnt = 0
             var visitCnt = 0
             if let err = err {
@@ -52,7 +54,6 @@ class GPSPersistence : NSObject, ObservableObject {
                     if let locationName = document.get("locationName") {
                         let visits = document.get("visits") as! NSDictionary
                         var location:LocationRecord?
-                        //let id = document.documentID
                         for (key, _) in visits {
                             let visitNum = visits[key] as! NSDictionary
                             let datetime = visitNum["datetime"] as! Double
@@ -71,10 +72,38 @@ class GPSPersistence : NSObject, ObservableObject {
                         
                         if let location = location {
                             LocationRecords.shared.addLocation(location: location)
+                            let pictureURL = document.get("pictureURL")
+                            if let url = pictureURL {
+                                location.pictureURL = url as? String
+                                pictureLocations.append(location)
+                            }
                         }
                         locationCnt += 1
                     }
                     self.setStatus("Loaded \(locationCnt) locations, \(visitCnt) visits")
+                }
+            }
+            
+            // load pictures
+            //https://firebase.google.com/docs/storage/ios/download-files
+            
+            DispatchQueue.main.async {
+                for location in pictureLocations {
+                    if let url = location.pictureURL {
+                        let storage = Storage.storage()
+                        let storageRef = storage.reference()
+                        let httpsReference = storage.reference(forURL: url)
+                        httpsReference.getData(maxSize: 32 * 1024 * 1024) { data, error in
+                            if let error = error {
+                                //TODO proper error handling
+                                print(error.localizedDescription)
+                            } else {
+                                if let data = data {
+                                    location.pictureSet.pictures.append(data)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -86,6 +115,7 @@ class GPSPersistence : NSObject, ObservableObject {
         doc.delete()
         doc.setData([
             "locationName" : location.locationName,
+            "pictureURL" : location.pictureURL
         ])
         let ref = collection.document(docId)
         var i = 0
@@ -117,22 +147,22 @@ class GPSPersistence : NSObject, ObservableObject {
         //https://firebase.google.com/docs/storage/ios/create-reference
         let storage = Storage.storage()
         let storageRef = storage.reference()
-        let riversRef = storageRef.child("images/\(location.locationName).jpg")
+        let imageRef = storageRef.child("images/\(location.getID() + "_" + location.locationName).jpg")
 
         // Upload the file to the path "images/rivers.jpg"
-        let uploadTask = riversRef.putData(location.pictureSet.pictures[0], metadata: nil) { (metadata, error) in
+        let uploadTask = imageRef.putData(location.pictureSet.pictures[0], metadata: nil) { (metadata, error) in
             guard let metadata = metadata else {
                 self.status = "Storage save, metadata, \(error?.localizedDescription ?? "?")"
-                //print("============= Uh-oh, an error occurred!", error?.localizedDescription)
+                //TODO
                 return
             }
             // Metadata contains file metadata such as size, content-type.
             let size = metadata.size
             // You can also access to download URL after upload.
-            riversRef.downloadURL { (url, error) in
+            imageRef.downloadURL { (url, error) in
                 guard let url = url else {
                     self.status = "Storage save, download URL, \(error?.localizedDescription ?? "?")"
-                    //print("=========== Uh-oh, an error occurred! ......", error?.localizedDescription)
+                    //TODO
                     return
                 }
                 let downloadUrl = "\(url)"
@@ -146,7 +176,6 @@ class GPSPersistence : NSObject, ObservableObject {
     
     func deleteLocation(locationId:String) {
         let doc = collection.document(locationId)
-        print("========delete", "id:", locationId)
         doc.delete()
         self.setStatus("Deleted \(locationId)")
     }
