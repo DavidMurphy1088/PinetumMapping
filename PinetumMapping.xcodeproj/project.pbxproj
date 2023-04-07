@@ -47,7 +47,7 @@
 		7BA33E43299238F00089FAF3 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E42299238F00089FAF3 /* LocationManager.swift */; };
 		7BA33E452992396D0089FAF3 /* LocationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E442992396D0089FAF3 /* LocationsView.swift */; };
 		7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA33E46299239960089FAF3 /* LocationVisitsView.swift */; };
-		7BAB587329AA11ED0078B3D5 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */; };
+		7BAB587329AA11ED0078B3D5 /* MessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAB587229AA11EC0078B3D5 /* MessageHandler.swift */; };
 		7BCAAC80299B70D700CB4B53 /* LocationRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */; };
 		7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCAAC81299B73CE00CB4B53 /* Util.swift */; };
 		7BEF6F1629A75E8900DCBC4E /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BEF6F1029A75E8800DCBC4E /* CameraService.swift */; };
@@ -76,7 +76,7 @@
 		7BA33E42299238F00089FAF3 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7BA33E442992396D0089FAF3 /* LocationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsView.swift; sourceTree = "<group>"; };
 		7BA33E46299239960089FAF3 /* LocationVisitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationVisitsView.swift; sourceTree = "<group>"; };
-		7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
+		7BAB587229AA11EC0078B3D5 /* MessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageHandler.swift; sourceTree = "<group>"; };
 		7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRecords.swift; sourceTree = "<group>"; };
 		7BCAAC81299B73CE00CB4B53 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		7BEF6F1029A75E8800DCBC4E /* CameraService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CameraService.swift; path = "../../../SwiftCamera-main/SwiftCamera/CameraService.swift"; sourceTree = "<group>"; };
@@ -189,7 +189,7 @@
 				7BA33E42299238F00089FAF3 /* LocationManager.swift */,
 				7BCAAC7F299B70D700CB4B53 /* LocationRecords.swift */,
 				7BCAAC81299B73CE00CB4B53 /* Util.swift */,
-				7BAB587229AA11EC0078B3D5 /* ErrorHandler.swift */,
+				7BAB587229AA11EC0078B3D5 /* MessageHandler.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -326,7 +326,7 @@
 				7BA33E2F299237820089FAF3 /* PinetumMappingApp.swift in Sources */,
 				7BCAAC82299B73CE00CB4B53 /* Util.swift in Sources */,
 				7BA33E47299239960089FAF3 /* LocationVisitsView.swift in Sources */,
-				7BAB587329AA11ED0078B3D5 /* ErrorHandler.swift in Sources */,
+				7BAB587329AA11ED0078B3D5 /* MessageHandler.swift in Sources */,
 				7B37CCEE2992622F00B201EC /* LocationCloudPersistence.swift in Sources */,
 				7BEF6F1B29A75E8900DCBC4E /* CameraService+Enums.swift in Sources */,
 			);

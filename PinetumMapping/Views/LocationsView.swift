@@ -37,11 +37,11 @@ struct LocationsView: View {
         formatter.dateFormat = "MMM-dd HH:mm"
         let dateString = formatter.string(from: now)
         var ret = rec.locationName + "\t" + dateString + "\t" + rec.visits[0].deviceName
-        if let bestLoc = locationManager.getBestLocation() {
+        if let meanLoc = locationManager.getMeanLocation() {
             ret += "\nDist to current:" + String(format: "%.1f",
                                      locationManager.distance(startLat:rec.visits[0].latitude, startLng:rec.visits[0].longitude,
-                                                              endLat: bestLoc.latitude,
-                                                              endLng: bestLoc.longitude))
+                                                              endLat: meanLoc.latitude,
+                                                              endLng: meanLoc.longitude))
         }
         else {
             ret += " dist:Unknown"

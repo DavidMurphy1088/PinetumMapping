@@ -7,7 +7,6 @@ import AVFoundation
 
 class LocationCloudPersistence : NSObject, ObservableObject {
     static public let shared = LocationCloudPersistence()
-    @Published public var status = ""
     @Published public var deviceName:String?
     
     private let collection = Firestore.firestore().collection("locations")
@@ -18,13 +17,7 @@ class LocationCloudPersistence : NSObject, ObservableObject {
             self.deviceName = dev
         }
     }
-    
-    private func setStatus(_ msg: String) {
-        DispatchQueue.main.async {
-            self.status = msg
-        }
-    }
-    
+        
     public func saveDeviceName(name:String) {
         UserDefaults.standard.set(name, forKey: "GPSDeviceName")
         DispatchQueue.main.async {
@@ -48,7 +41,7 @@ class LocationCloudPersistence : NSObject, ObservableObject {
             var locationCnt = 0
             var visitCnt = 0
             if let err = err {
-                self.setStatus("Error getting documents: \(err)")
+                MessageHandler.shared.reportError(context: "Get Locations", err.localizedDescription)
             } else {
                 for document in querySnapshot!.documents {
                     if let locationName = document.get("locationName") {
@@ -80,7 +73,7 @@ class LocationCloudPersistence : NSObject, ObservableObject {
                         }
                         locationCnt += 1
                     }
-                    self.setStatus("Loaded \(locationCnt) locations, \(visitCnt) visits")
+                    MessageHandler.shared.setStatus("Loaded \(locationCnt) locations, \(visitCnt) visits")
                 }
             }
             
@@ -91,12 +84,10 @@ class LocationCloudPersistence : NSObject, ObservableObject {
                 for location in pictureLocations {
                     if let url = location.pictureURL {
                         let storage = Storage.storage()
-                        let storageRef = storage.reference()
                         let httpsReference = storage.reference(forURL: url)
                         httpsReference.getData(maxSize: 32 * 1024 * 1024) { data, error in
                             if let error = error {
-                                //TODO proper error handling
-                                print(error.localizedDescription)
+                                MessageHandler.shared.reportError(context: "Load pictures", error.localizedDescription)
                             } else {
                                 if let data = data {
                                     location.pictureSet.pictures.append(data)
@@ -115,7 +106,7 @@ class LocationCloudPersistence : NSObject, ObservableObject {
         doc.delete()
         doc.setData([
             "locationName" : location.locationName,
-            "pictureURL" : location.pictureURL
+            "pictureURL" : location.pictureURL as Any
         ])
         let ref = collection.document(docId)
         var i = 0
@@ -140,7 +131,7 @@ class LocationCloudPersistence : NSObject, ObservableObject {
                 self.savePictures(location: location, ref: ref)
             }
         }
-        self.setStatus("Saved \(location.locationName)")
+        MessageHandler.shared.setStatus("Saved \(location.locationName)")
     }
     
     func savePictures(location:LocationRecord, ref:DocumentReference) {
@@ -149,27 +140,21 @@ class LocationCloudPersistence : NSObject, ObservableObject {
         let storageRef = storage.reference()
         let imageRef = storageRef.child("images/\(location.getID() + "_" + location.locationName).jpg")
 
-        // Upload the file to the path "images/rivers.jpg"
         let uploadTask = imageRef.putData(location.pictureSet.pictures[0], metadata: nil) { (metadata, error) in
-            guard let metadata = metadata else {
-                self.status = "Storage save, metadata, \(error?.localizedDescription ?? "?")"
-                //TODO
-                return
-            }
-            // Metadata contains file metadata such as size, content-type.
-            let size = metadata.size
-            // You can also access to download URL after upload.
+//            guard let metadata = metadata else {
+//                MessageHandler.shared.reportError(context: "Save Picture", "No metadata")
+//                return
+//            }
             imageRef.downloadURL { (url, error) in
                 guard let url = url else {
-                    self.status = "Storage save, download URL, \(error?.localizedDescription ?? "?")"
-                    //TODO
+                    MessageHandler.shared.reportError(context: "Storage save, no URL", "")
                     return
                 }
                 let downloadUrl = "\(url)"
                 ref.updateData([
                     "pictureURL" : downloadUrl
                     ])
-                    self.status = "Storage, updated:\(location.locationName) URL:\(downloadUrl)"
+                MessageHandler.shared.setStatus("Save picture updated:\(location.locationName)")
             }
         }
     }
@@ -177,6 +162,6 @@ class LocationCloudPersistence : NSObject, ObservableObject {
     func deleteLocation(locationId:String) {
         let doc = collection.document(locationId)
         doc.delete()
-        self.setStatus("Deleted \(locationId)")
+        MessageHandler.shared.setStatus("Deleted \(locationId)")
     }
 }

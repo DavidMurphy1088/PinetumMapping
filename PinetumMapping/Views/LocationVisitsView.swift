@@ -6,6 +6,25 @@ import CoreLocationUI
 import CoreLocation
 import UIKit
 
+struct FullImageView: View {
+    var image: Image
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        image
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .edgesIgnoringSafeArea(.all)
+            .navigationBarTitle(Text("Full Screen"), displayMode: .inline)
+            .gesture(
+                TapGesture()
+                    .onEnded { _ in
+                        dismiss()
+                    }
+            )
+    }
+}
+
 struct LocationVisitsView: View {
     @ObservedObject var locations:LocationRecords
     @ObservedObject var location:LocationRecord
@@ -14,13 +33,14 @@ struct LocationVisitsView: View {
 
     @State private var angle = 0.0
     @State private var savePopup = false
+    @State private var isFullScreen = false
     
     func saveForm(saveLocation:CLLocationCoordinate2D) -> some View {
         Form {
             VStack {
                 VStack(alignment: .center) {
                     Text("Save a New Location Revisit").font(.title2).bold()
-                    if let message = locationManager.status {
+                    if let message = MessageHandler.shared.status {
                         Text("\n"+message+"\n")
                     }
                 }
@@ -35,7 +55,7 @@ struct LocationVisitsView: View {
                         locations.addVisit(location: location, visit: revisitRecord)
                         savePopup = false
                     }
-                    .disabled(locationManager.getBestLocation() == nil)
+                    .disabled(locationManager.getMeanLocation() == nil)
                     Spacer()
                 }
             }
@@ -61,8 +81,8 @@ struct LocationVisitsView: View {
     func visitLine(rec : LocationVisitRecord) -> String {
         var ret = Util.fmtDatetime(datetime: rec.datetime) + "\t" + rec.deviceName
         let firstVisit = location.visits[0]
-        if let bestLoc = locationManager.getBestLocation() {
-            let currDist = locationManager.distance(startLat: bestLoc.latitude, startLng: bestLoc.longitude, endLat: rec.latitude, endLng: rec.longitude)
+        if let meanLoc = locationManager.getMeanLocation() {
+            let currDist = locationManager.distance(startLat: meanLoc.latitude, startLng: meanLoc.longitude, endLat: rec.latitude, endLng: rec.longitude)
             ret += "\nDistance to current:"+String(format: "%.1f",currDist)
         }
         let firstDist = locationManager.distance(startLat: firstVisit.latitude, startLng: firstVisit.longitude, endLat: rec.latitude, endLng: rec.longitude)
@@ -84,37 +104,43 @@ struct LocationVisitsView: View {
         VStack {
             Text("Location:" + location.locationName).font(.title2).bold()
             Text("Distance from current location:" + String(format: "%.1f",distance()))
-            if let message = locationManager.status {
+            if let message = MessageHandler.shared.status {
                 Text(message).font(.caption)
             }
 
-//            Image("pointer")
-//            .resizable()
-//            .rotationEffect(.degrees(bearing()))
-//            .animation(.easeIn, value: bearing())
-            
             if location.pictureSet.pictures.count > 0 {
                 if let imageData = location.pictureSet.pictures[0] {
                     if let image = UIImage(data: imageData) {
+//                        Image(uiImage: image)
+//                            .resizable()
+//                            .interpolation(.none)
+//                            .aspectRatio(contentMode: .fit)
+//                            .border(.blue)
                         Image(uiImage: image)
                             .resizable()
-                            .interpolation(.none)
-                            .aspectRatio(contentMode: .fit)
-                        //.frame(width: CGFloat(im.size), alignment: .topLeading)
-                            .border(.blue)
+                            .scaledToFit()
+                            .gesture(
+                                TapGesture()
+                                    .onEnded { _ in
+                                        isFullScreen = true
+                                    }
+                            )
+                            .fullScreenCover(isPresented: $isFullScreen) {
+                                FullImageView(image: Image(uiImage: image))
+                            }
+
                     }
                 }
             }
             
             List {
                 Text("Visits to this location").font(.title3).bold()
-                ForEach(location.visits, id: \.datetime) { revisit in
+                ForEach(location.visits.sorted(), id: \.datetime) { revisit in
                     Text(self.visitLine(rec: revisit))
                 }
-                //.onDelete(perform: revisit.de ? delete : nil)
                 .onDelete(perform: delete)
             }
-            saveVisitView(saveLocation: locationManager.getBestLocation())
+            saveVisitView(saveLocation: locationManager.getMeanLocation())
         }
     }
     
@@ -178,7 +204,7 @@ struct LocationVisitsView: View {
     }
     
     func distance() -> Double {
-        if let cur = locationManager.getBestLocation() {
+        if let cur = locationManager.getMeanLocation() {
             return locationManager.distance(startLat:location.visits[0].latitude, startLng:location.visits[0].longitude,
                                             endLat: cur.latitude, endLng: cur.longitude)
         }

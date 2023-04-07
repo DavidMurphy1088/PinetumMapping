@@ -8,7 +8,7 @@ import UIKit
 import FirebaseAnalyticsSwift
 
 struct ContentView: View {
-    @ObservedObject var errors = ErrorHandler.shared
+    @ObservedObject var errors = MessageHandler.shared
     @State private var showingAlert = false
 
     var body: some View {
@@ -24,9 +24,7 @@ struct ContentView: View {
                 }
         }
         //.navigationTitle("GPS Reader")
-        //.analyticsScreen(name: "ContentTest")
-        //TODO and add to error cases
-        .alert..("Important message", isPresented: $errors.showingAlert) {
+        .alert(MessageHandler.shared.error ?? "", isPresented: $errors.showingAlert) {
             Button("OK", role: .cancel) { }
         }
     }
@@ -42,27 +40,15 @@ struct MappingView: View {
 
     @State var showingDeviceNamePopover = false
     @State var deviceName: String = ""
-    @State private var stability: Double = 0 //todo
+    @State private var stability: Double = Double(LocationManager.shared.requiredStabilityCounter)
     
-//    func fmt(_ l: CLLocationCoordinate2D) -> String {
-//        return String(format: "%.5f", l.latitude)+",  "+String(format: "%.5f", l.longitude)
-//    }
-
     func GPSView() -> some View {
         NavigationView {
             VStack {
                 Text("GPS Reader").font(.title2).bold()
-                if let message = locationManager.status {
+                if let message = MessageHandler.shared.status {
                     Spacer()
-                    Text(message)//.font(.)
-                }
-                if let message = persistence.status {
-                    Spacer()
-                    Text("Persist Mgr: " + message).font(.caption)
-                }
-                if let err = ErrorHandler.shared.error {
-                    Spacer()
-                    Text("Error: " + err).font(.caption)
+                    Text(message)
                 }
  
                 if locationManager.currentLocation == nil {
@@ -85,10 +71,11 @@ struct MappingView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        if let bestLocation = locationManager.getBestLocation() {
+                        if let bestLocation = locationManager.getMeanLocation() {
                             NavigationLink("Save Location") {
                                 SaveLocationView(location: bestLocation)
                             }
+                            .disabled(locationManager.getMeanLocation() == nil)
                         }
                         Spacer()
                         Button("Reset GPS") {
@@ -98,7 +85,7 @@ struct MappingView: View {
                     }
                     
                     VStack {
-                        Slider(value: $stability, in: 0...6)
+                        Slider(value: $stability, in: 0...2*Double(LocationManager.shared.initialRequiredStabilityCounter))
                             .onChange(of: stability) { newValue in
                                 locationManager.requiredStabilityCounter = Int(stability)
                             }
@@ -120,7 +107,6 @@ struct MappingView: View {
                 Spacer()
                 Button("Set Device Name") {
                     showingDeviceNamePopover = true
-                    
                 }
                 .padding()
                 .popover(isPresented: $showingDeviceNamePopover) {
@@ -147,9 +133,3 @@ struct MappingView: View {
         }
     }
 }
-
-//struct ContentView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-//    }
-//}

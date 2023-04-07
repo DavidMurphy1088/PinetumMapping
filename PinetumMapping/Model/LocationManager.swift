@@ -22,26 +22,28 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     static public let shared = LocationManager()
     
     @Published var currentHeading: CLLocationDirection?
-    @Published var status: String?
     @Published var locationIsStable: Bool = false
     @Published var stableLocationsCount = 0
 
     public var displayLocations: [StableGPSLocation] = []
     public var currentLocation: CLLocationCoordinate2D?
-    public var requiredStabilityCounter:Int = 4 //TODO
-
-    private var bestLocation: CLLocationCoordinate2D? //average of all stable location GPS reads
+    
     private let locationManager = CLLocationManager()
     private var stableLocations: StableGPSLocations = StableGPSLocations()
     private var locationReadCount = 0
-    private var lastLocation: CLLocationCoordinate2D?
-    private var stableLocCounter:Int = 0 //counts # of successive GPS readings that have not changed location much
     private var lastDelta:Double?
+
+    private var meanLocation: CLLocationCoordinate2D? //average of all stable location GPS reads
+    private var lastLocation: CLLocationCoordinate2D?
+    private var stableLocCounter:Int = 0 //# of successive GPS readings that have not changed much and so considered a 'stable' GPS reading
     
+    public var initialRequiredStabilityCounter:Int = 4 //TODO How many 'stable' readings required to provide a singl 'mean' average reading
+    public var requiredStabilityCounter:Int = 0
+
     override init() {
         super.init()
         locationManager.delegate = self
-
+        self.requiredStabilityCounter = self.initialRequiredStabilityCounter
         switch locationManager.accuracyAuthorization {
         case .fullAccuracy:
             self.setStatus("Full Accuracy")
@@ -53,15 +55,19 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
     }
     
-    func getBestLocation() -> CLLocationCoordinate2D? {
-        return lastLocation
-        //return self.bestLocation //TODO
+    func getMeanLocation() -> CLLocationCoordinate2D? {
+        if self.stableLocations.locations.count > 0 {
+            return self.meanLocation
+        }
+        else {
+            return nil
+        }
     }
     
     func reset() {
         stableLocCounter = 0
         stableLocations.locations = []
-        bestLocation = nil
+        meanLocation = nil
         
         locationIsStable = false
         currentLocation = nil
@@ -75,7 +81,7 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
     
     private func setStatus(_ msg: String) {
         DispatchQueue.main.async {
-            self.status = msg
+            MessageHandler.shared.setStatus(msg)
         }
     }
     
@@ -154,15 +160,15 @@ final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelega
                     //add calculated center GPS reading location
                     let avgLatitude = totLatitude / Double(stableLocations.locations.count)
                     let avgLongitude = totLongitude / Double(stableLocations.locations.count)
-                    self.bestLocation = CLLocationCoordinate2D(latitude: avgLatitude, longitude: avgLongitude)
-                    //StableLocation(lat: avgLatitude, lng: avgLongitude, ptType: 0)
                     self.displayLocations.append(StableGPSLocation(lat: avgLatitude - firstLocation.latitude,
                                                                 lng: avgLongitude - firstLocation.longitude, ptType: 3))
+                    self.meanLocation = CLLocationCoordinate2D(latitude: avgLatitude, longitude: avgLongitude)
+
                     //average distances from center
                     var totalDistance = 0.0
                     for location in self.stableLocations.locations {
                         let dist = self.distance(startLat: location.latitude, startLng: location.longitude,
-                                                 endLat: self.bestLocation!.latitude, endLng: self.bestLocation!.longitude)
+                                                 endLat: self.meanLocation!.latitude, endLng: self.meanLocation!.longitude)
                         totalDistance += dist
                     }
                     avgDist = totalDistance / Double(self.stableLocations.locations.count)

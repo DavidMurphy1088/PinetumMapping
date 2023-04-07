@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class LocationVisitRecord : Codable, Hashable {
+class LocationVisitRecord : Codable, Hashable, Comparable {
     var deviceName:String
     var datetime:TimeInterval
     var latitude:Double

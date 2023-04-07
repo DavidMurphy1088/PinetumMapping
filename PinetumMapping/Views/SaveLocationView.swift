@@ -19,7 +19,7 @@ struct SaveLocationView : View {
         NavigationView {
             VStack(alignment: .center) {
                 Text("Save Location").font(.title2).bold()
-                if let message = locationManager.status {
+                if let message = MessageHandler.shared.status {
                     Text(message)
                 }
                 TextField("location name", text: $locationName)
