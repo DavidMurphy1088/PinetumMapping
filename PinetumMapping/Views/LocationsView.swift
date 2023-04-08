@@ -54,13 +54,6 @@ struct LocationsView: View {
         VStack {
             NavigationStack {
                 Text("Saved Locations").font(.title2).bold().padding()
-//                if let message = locationManager.status {
-//                    Text(message)
-//                }
-//                if let message = persistence.status {
-//                    Spacer()
-//                    Text(message)
-//                }
                 List {
                     Text("Swipe row left to delete").font(.caption)
                     ForEach(locations.getLocations().sorted()) { location in
@@ -80,7 +73,7 @@ struct LocationsView: View {
                .confirmationDialog("Are you sure?",
                     isPresented: $isPresentingConfirm) {
                     Button("Delete all locations?", role: .destructive) {
-                        //locationManager.clearList()
+                        // locationManager.clearList()
                     }
                 }
             }
