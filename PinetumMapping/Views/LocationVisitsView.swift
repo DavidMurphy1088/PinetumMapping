@@ -160,7 +160,6 @@ struct LocationVisitsView: View {
         
         //west coast        -41.2773, 174.6222
         //south west        -42.1333, 172.7399
-        //far west          -41.1189, 170.1745
         
         let lat1 = srcLat
         let lon1 = srcLong
